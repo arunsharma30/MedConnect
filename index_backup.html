@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en" style="">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>MedConnect — Better care starts with a better connection.</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-surface-variant": "#464555",
+                        "tertiary-fixed-dim": "#ffafd3",
+                        "on-primary-fixed": "#0f0069",
+                        "on-tertiary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "surface-container-high": "#e1e8fd",
+                        "on-secondary-container": "#fffbff",
+                        "tertiary": "#a02d6f",
+                        "on-primary-fixed-variant": "#321ed2",
+                        "on-secondary-fixed-variant": "#5516be",
+                        "on-primary": "#ffffff",
+                        "surface-container-low": "#f1f3ff",
+                        "surface-container-highest": "#dce2f7",
+                        "on-tertiary-container": "#fffafa",
+                        "inverse-surface": "#293040",
+                        "primary-fixed": "#e2dfff",
+                        "error": "#ba1a1a",
+                        "outline": "#777587",
+                        "primary": "#493ee5",
+                        "tertiary-fixed": "#ffd8e7",
+                        "on-error-container": "#93000a",
+                        "primary-fixed-dim": "#c3c0ff",
+                        "surface-container": "#e9edff",
+                        "inverse-primary": "#c3c0ff",
+                        "on-tertiary-fixed": "#3d0026",
+                        "surface-bright": "#f9f9ff",
+                        "outline-variant": "#c7c4d8",
+                        "surface-dim": "#d3daef",
+                        "secondary-fixed": "#e9ddff",
+                        "tertiary-container": "#bf4789",
+                        "on-background": "#141b2b",
+                        "surface": "#f9f9ff",
+                        "secondary-fixed-dim": "#d0bcff",
+                        "inverse-on-surface": "#edf0ff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-fixed": "#23005c",
+                        "background": "#f9f9ff",
+                        "secondary-container": "#8455ef",
+                        "surface-variant": "#dce2f7",
+                        "secondary": "#6b38d4",
+                        "on-tertiary-fixed-variant": "#85145a",
+                        "surface-tint": "#4c42e9",
+                        "on-secondary": "#ffffff",
+                        "on-primary-container": "#fefaff",
+                        "on-error": "#ffffff",
+                        "primary-container": "#635bff",
+                        "on-surface": "#141b2b"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "space-48": "3rem",
+                        "space-12": "0.75rem",
+                        "gutter-desktop": "1.5rem",
+                        "space-2": "0.125rem",
+                        "space-40": "2.5rem",
+                        "space-32": "2rem",
+                        "space-16": "1rem",
+                        "gutter-mobile": "1rem",
+                        "space-4": "0.25rem",
+                        "space-8": "0.5rem",
+                        "space-24": "1.5rem",
+                        "space-64": "4rem",
+                        "max-width-content": "72rem"
+                    },
+                    fontFamily: {
+                        "headline-sm": ["Plus Jakarta Sans"],
+                        "display-sm": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "body-sm": ["Plus Jakarta Sans"],
+                        "label-md": ["Plus Jakarta Sans"]
+                    },
+                    fontSize: {
+                        "headline-sm": ["16px", { lineHeight: "24px", letterSpacing: "0em", fontWeight: "600" }],
+                        "display-sm": ["30px", { lineHeight: "38px", letterSpacing: "-0.015em", fontWeight: "600" }],
+                        "body-lg": ["16px", { lineHeight: "26px", letterSpacing: "0em", fontWeight: "400" }],
+                        "label-sm": ["11px", { lineHeight: "16px", letterSpacing: "0.04em", fontWeight: "600" }],
+                        "body-md": ["14px", { lineHeight: "22px", letterSpacing: "0em", fontWeight: "400" }],
+                        "headline-md": ["20px", { lineHeight: "28px", letterSpacing: "-0.005em", fontWeight: "600" }],
+                        "headline-lg": ["24px", { lineHeight: "32px", letterSpacing: "-0.01em", fontWeight: "600" }],
+                        "display-lg": ["36px", { lineHeight: "44px", letterSpacing: "-0.02em", fontWeight: "700" }],
+                        "body-sm": ["12px", { lineHeight: "18px", letterSpacing: "0.01em", fontWeight: "400" }],
+                        "label-md": ["13px", { lineHeight: "18px", letterSpacing: "0.01em", fontWeight: "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+            display: inline-block;
+            vertical-align: middle;
+            line-height: 1;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-background text-on-surface font-body-md antialiased selection:bg-primary-fixed selection:text-on-primary-fixed min-h-screen flex flex-col">
+    <!-- Shared Component: TopNavBar -->
+    <header class="border-b border-outline-variant bg-surface sticky top-0 z-50 shadow-sm w-full">
+        <div class="max-w-max-width-content mx-auto h-16 px-6 md:px-12 flex items-center justify-between">
+            <div class="flex items-center space-x-8">
+                <a class="flex items-center space-x-2.5 text-on-surface" href="#">
+                    <div
+                        class="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center text-on-primary">
+                        <span class="material-symbols-outlined text-[20px]"
+                            data-icon="health_and_safety">health_and_safety</span>
+                    </div>
+                    <span
+                        class="text-headline-md font-headline-md font-bold tracking-tight text-on-surface">MedConnect</span>
+                </a>
+                <nav class="hidden md:flex items-center space-x-6">
+                    <a class="text-on-surface-variant font-body-md hover:text-primary transition-colors duration-150"
+                        href="#find-doctor">Find a Doctor</a>
+                    <a class="text-on-surface-variant font-body-md hover:text-primary transition-colors duration-150"
+                        href="#how-it-works">How It Works</a>
+                    <a class="text-on-surface-variant font-body-md hover:text-primary transition-colors duration-150"
+                        href="#for-doctors">For Doctors</a>
+                </nav>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button
+                    class="text-headline-sm font-headline-sm text-on-surface-variant hover:text-primary px-3 py-2 rounded-lg transition-all duration-150 active:scale-95"
+                    onclick="openAuthModal('patient', 'login')">
+                    Log in
+                </button>
+                <button
+                    class="bg-primary-container hover:bg-primary text-on-primary text-label-md font-label-md font-medium px-4 py-2 rounded-lg transition-all duration-150 active:scale-95 shadow-sm"
+                    onclick="openAuthModal('patient', 'register')">
+                    Get Started
+                </button>
+            </div>
+        </div>
+    </header>
+    <!-- Main Content Canvas -->
+    <main class="flex-grow">
+        <!-- Hero Section -->
+        <section class="max-w-max-width-content mx-auto px-6 md:px-12 pt-6 md:pt-10 pb-16">
+            <div
+                class="relative w-full min-h-[560px] md:min-h-[640px] rounded-2xl md:rounded-3xl overflow-hidden border border-outline-variant shadow-sm flex items-center bg-surface-container-lowest">
+                <!-- Full-Frame Editorial Background Image -->
+                <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCm8f_Go5JGHVgE4szi7WKNaGyDI4b8wpUa9CmYOwYEG6GAWpV2sBGxUyXS9vtMa9lDlYivBcVolSW50xIySYkx9cPFx8rLX6lbzyMQ166_AfTcW-vOLRUe49n0rQHIgBHpV-KP7hfdauljkhIsGyHWsHVGPnjCEDNWVr6TrRSWlQ-rWJpHRmujrOsIh9xxM02qqJilwrypfAuRNMnAD5VLtpZuaVsuc-ZuemSyuwB1fj-uQYrHd8br"
+                    alt="Doctor looking forward with warmth in modern healthcare clinic"
+                    class="absolute inset-0 w-full h-full object-cover object-right md:object-center">
+
+                <!-- Directional Editorial Gradient Scrim (Left-to-Right and subtle bottom scrim) -->
+                <div
+                    class="absolute inset-0 bg-gradient-to-r from-white via-white/90 to-transparent/10 md:w-3/4 lg:w-3/5 pointer-events-none">
+                </div>
+                <div
+                    class="absolute inset-0 bg-gradient-to-t from-white/60 via-transparent to-transparent md:hidden pointer-events-none">
+                </div>
+
+                <!-- Floating Doctor Credential Badge in Corner -->
+
+
+                <!-- Foreground Hero Content Content Layer -->
+                <div class="relative z-10 p-8 md:p-14 lg:p-16 max-w-2xl">
+                    <div class="space-y-6">
+                        <div
+                            class="inline-flex items-center space-x-2 bg-surface-container-lowest/90 backdrop-blur-sm border border-outline-variant px-3.5 py-1.5 rounded-full text-label-sm font-label-sm text-primary shadow-xs">
+                            <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                            <span class="">Healthcare, connected.</span>
+                        </div>
+
+                        <h1
+                            class="text-display-lg font-display-lg text-on-surface tracking-tight text-[32px] md:text-[44px] leading-tight md:leading-[1.15]">
+                            Better care starts with a better connection.
+                        </h1>
+
+                        <p class="text-body-lg font-body-lg text-on-surface-variant max-w-xl leading-relaxed">
+                            MedConnect brings patients and doctors together for appointments, consultations,
+                            prescriptions, and medical records — all in one calm, connected platform.
+                        </p>
+
+                        <div class="flex flex-wrap items-center gap-3 pt-2">
+                            <a class="inline-flex items-center justify-center bg-primary-container hover:bg-primary text-on-primary text-label-md font-label-md font-medium px-6 py-3 rounded-lg transition-all duration-150 shadow-sm active:scale-95"
+                                href="#role-selection">
+                                Find a Doctor
+                            </a>
+                            <button
+                                class="inline-flex items-center justify-center bg-surface-container-lowest/90 backdrop-blur-sm border border-outline-variant hover:bg-surface-container-low text-on-surface text-label-md font-label-md font-medium px-6 py-3 rounded-lg transition-all duration-150 active:scale-95 shadow-xs"
+                                onclick="openAuthModal('patient', 'register')">
+                                Get Started
+                            </button>
+                        </div>
+
+                        <!-- Trust Badges -->
+                        <div
+                            class="pt-6 border-t border-outline-variant/80 flex flex-wrap items-center gap-6 text-on-surface-variant text-body-sm font-body-sm">
+                            <div class="flex items-center space-x-2">
+                                <span class="material-symbols-outlined text-primary text-[18px]"
+                                    data-icon="verified_user">verified_user</span>
+                                <span class="">HIPAA Certified</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="material-symbols-outlined text-primary text-[18px]"
+                                    data-icon="medical_services">medical_services</span>
+                                <span class="">Licensed MDs</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="material-symbols-outlined text-primary text-[18px]"
+                                    data-icon="lock">lock</span>
+                                <span class="">256-bit Encrypted</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Role Selection Section -->
+        <section class="bg-surface-container-low border-y border-outline-variant py-16" id="role-selection">
+            <div class="max-w-max-width-content mx-auto px-6 md:px-12">
+                <div class="text-center max-w-2xl mx-auto mb-12">
+                    <span
+                        class="text-label-sm font-label-sm text-primary tracking-wider uppercase font-semibold">Portals</span>
+                    <h2 class="text-display-sm font-display-sm text-on-surface tracking-tight mt-1">
+                        How would you like to use MedConnect?
+                    </h2>
+                    <p class="text-body-md font-body-md text-on-surface-variant mt-2">
+                        Tailored portals designed for patients seeking care and physicians delivering it.
+                    </p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                    <!-- Patient Card -->
+                    <div
+                        class="bg-surface-container-lowest border border-outline-variant rounded-xl p-8 shadow-sm flex flex-col justify-between transition-all duration-150 hover:border-primary">
+                        <div>
+                            <div
+                                class="w-12 h-12 rounded-lg bg-surface-container-high text-primary flex items-center justify-center mb-6">
+                                <span class="material-symbols-outlined text-[28px]" data-icon="person">person</span>
+                            </div>
+                            <h3 class="text-headline-lg font-headline-lg text-on-surface">For Patients</h3>
+                            <p class="text-body-md font-body-md text-on-surface-variant mt-3 leading-relaxed">
+                                Find verified physicians, schedule virtual or in-person visits, and keep your care
+                                records synchronized in a unified clinical dashboard.
+                            </p>
+                            <div class="mt-6 space-y-2.5 text-body-sm font-body-sm text-on-surface-variant">
+                                <div class="flex items-center space-x-2">
+                                    <span class="material-symbols-outlined text-primary text-[18px]"
+                                        data-icon="check_circle">check_circle</span>
+                                    <span class="">Instant slot confirmation with top specialists</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="material-symbols-outlined text-primary text-[18px]"
+                                        data-icon="check_circle">check_circle</span>
+                                    <span class="">Direct pharmacy electronic prescription routing</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="material-symbols-outlined text-primary text-[18px]"
+                                        data-icon="check_circle">check_circle</span>
+                                    <span class="">Zero subscription fees for basic accounts</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pt-8 mt-6 border-t border-outline-variant flex items-center justify-between">
+                            <button class="text-label-md font-label-md text-on-surface hover:text-primary"
+                                onclick="openAuthModal('patient', 'login')">
+                                Patient Log In
+                            </button>
+                            <button
+                                class="bg-primary-container hover:bg-primary text-on-primary text-label-md font-label-md font-medium px-4 py-2 rounded-lg transition-all duration-150 active:scale-95 shadow-sm"
+                                onclick="openAuthModal('patient', 'register')">
+                                Continue as Patient
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Doctor Card -->
+                    <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-8 shadow-sm flex flex-col justify-between transition-all duration-150 hover:border-primary"
+                        id="for-doctors">
+                        <div>
+                            <div
+                                class="w-12 h-12 rounded-lg bg-surface-container text-secondary flex items-center justify-center mb-6">
+                                <span class="material-symbols-outlined text-[28px]"
+                                    data-icon="stethoscope">stethoscope</span>
+                            </div>
+                            <h3 class="text-headline-lg font-headline-lg text-on-surface">For Doctors</h3>
+                            <p class="text-body-md font-body-md text-on-surface-variant mt-3 leading-relaxed">
+                                Streamline consultations, manage clinical schedules, review longitudinal patient
+                                histories, and issue secure digital prescriptions with zero administrative bloat.
+                            </p>
+                            <div class="mt-6 space-y-2.5 text-body-sm font-body-sm text-on-surface-variant">
+                                <div class="flex items-center space-x-2">
+                                    <span class="material-symbols-outlined text-secondary text-[18px]"
+                                        data-icon="check_circle">check_circle</span>
+                                    <span class="">Integrated EHR sync and HIPAA clinical notes</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="material-symbols-outlined text-secondary text-[18px]"
+                                        data-icon="check_circle">check_circle</span>
+                                    <span class="">Customizable availability and telehealth links</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="material-symbols-outlined text-secondary text-[18px]"
+                                        data-icon="check_circle">check_circle</span>
+                                    <span class="">Direct patient messaging and labs coordination</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pt-8 mt-6 border-t border-outline-variant flex items-center justify-between">
+                            <button class="text-label-md font-label-md text-on-surface hover:text-primary"
+                                onclick="openAuthModal('doctor', 'login')">
+                                Doctor Log In
+                            </button>
+                            <button
+                                class="bg-secondary hover:bg-on-secondary-fixed-variant text-on-secondary text-label-md font-label-md font-medium px-4 py-2 rounded-lg transition-all duration-150 active:scale-95 shadow-sm"
+                                onclick="openAuthModal('doctor', 'register')">
+                                Continue as Doctor
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- How It Works (Restrained, elegant 4-step sequence) -->
+        <section class="max-w-max-width-content mx-auto px-6 md:px-12 py-20" id="how-it-works">
+            <div class="text-center max-w-2xl mx-auto mb-16">
+                <span
+                    class="text-label-sm font-label-sm text-primary tracking-wider uppercase font-semibold">Workflow</span>
+                <h2 class="text-display-sm font-display-sm text-on-surface tracking-tight mt-1">
+                    Care with complete clarity.
+                </h2>
+                <p class="text-body-md font-body-md text-on-surface-variant mt-2">
+                    A modern medical experience structured to minimize delays and maximize patient-doctor relationship
+                    quality.
+                </p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Step 1 -->
+                <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 relative">
+                    <div class="text-label-sm font-label-sm text-primary font-bold tracking-wider mb-3">01 / FIND</div>
+                    <h4 class="text-headline-sm font-headline-sm text-on-surface mb-2">Verified Physicians</h4>
+                    <p class="text-body-md font-body-md text-on-surface-variant">
+                        Filter board-certified doctors by specialty, network, and real-time availability in your area.
+                    </p>
+                </div>
+                <!-- Step 2 -->
+                <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 relative">
+                    <div class="text-label-sm font-label-sm text-primary font-bold tracking-wider mb-3">02 / BOOK</div>
+                    <h4 class="text-headline-sm font-headline-sm text-on-surface mb-2">Instant Confirmation</h4>
+                    <p class="text-body-md font-body-md text-on-surface-variant">
+                        Select a confirmed slot in seconds without phone tag, calendar friction, or endless waiting
+                        rooms.
+                    </p>
+                </div>
+                <!-- Step 3 -->
+                <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 relative">
+                    <div class="text-label-sm font-label-sm text-primary font-bold tracking-wider mb-3">03 / CONSULT
+                    </div>
+                    <h4 class="text-headline-sm font-headline-sm text-on-surface mb-2">Video or In-Clinic</h4>
+                    <p class="text-body-md font-body-md text-on-surface-variant">
+                        Meet through secure HD telehealth video or visit in-clinic with full longitudinal medical
+                        context.
+                    </p>
+                </div>
+                <!-- Step 4 -->
+                <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 relative">
+                    <div class="text-label-sm font-label-sm text-primary font-bold tracking-wider mb-3">04 / CONTINUE
+                        CARE</div>
+                    <h4 class="text-headline-sm font-headline-sm text-on-surface mb-2">Continuous Records</h4>
+                    <p class="text-body-md font-body-md text-on-surface-variant">
+                        Access clinical notes, digital prescriptions, follow-up messages, and lab orders anytime.
+                    </p>
+                </div>
+            </div>
+        </section>
+        <!-- Trust & Clinical Standards Banner -->
+        <section class="bg-surface-container-lowest border-y border-outline-variant py-14">
+            <div class="max-w-max-width-content mx-auto px-6 md:px-12">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="flex items-start space-x-3.5">
+                        <div
+                            class="w-10 h-10 rounded-lg bg-surface-container-low border border-outline-variant flex items-center justify-center text-primary shrink-0">
+                            <span class="material-symbols-outlined text-[22px]" data-icon="lock">lock</span>
+                        </div>
+                        <div>
+                            <div class="text-headline-sm font-headline-sm text-on-surface text-[15px]">HIPAA Compliant
+                            </div>
+                            <div class="text-body-sm font-body-sm text-on-surface-variant mt-0.5">End-to-end encrypted
+                                clinical messaging and records storage.</div>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-3.5">
+                        <div
+                            class="w-10 h-10 rounded-lg bg-surface-container-low border border-outline-variant flex items-center justify-center text-primary shrink-0">
+                            <span class="material-symbols-outlined text-[22px]" data-icon="verified">verified</span>
+                        </div>
+                        <div>
+                            <div class="text-headline-sm font-headline-sm text-on-surface text-[15px]">Board Certified
+                            </div>
+                            <div class="text-body-sm font-body-sm text-on-surface-variant mt-0.5">Every doctor is
+                                credentialed and state-license verified.</div>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-3.5">
+                        <div
+                            class="w-10 h-10 rounded-lg bg-surface-container-low border border-outline-variant flex items-center justify-center text-primary shrink-0">
+                            <span class="material-symbols-outlined text-[22px]"
+                                data-icon="prescriptions">prescriptions</span>
+                        </div>
+                        <div>
+                            <div class="text-headline-sm font-headline-sm text-on-surface text-[15px]">Digital
+                                Prescriptions</div>
+                            <div class="text-body-sm font-body-sm text-on-surface-variant mt-0.5">Direct transmission to
+                                your preferred local or mail pharmacy.</div>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-3.5">
+                        <div
+                            class="w-10 h-10 rounded-lg bg-surface-container-low border border-outline-variant flex items-center justify-center text-primary shrink-0">
+                            <span class="material-symbols-outlined text-[22px]"
+                                data-icon="receipt_long">receipt_long</span>
+                        </div>
+                        <div>
+                            <div class="text-headline-sm font-headline-sm text-on-surface text-[15px]">Transparent
+                                Pricing</div>
+                            <div class="text-body-sm font-body-sm text-on-surface-variant mt-0.5">Clear out-of-pocket
+                                costs and accepted insurance plans upfront.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Interactive Auth Modal / Dedicated View Switcher Prototype -->
+        <section class="max-w-max-width-content mx-auto px-6 md:px-12 py-16">
+            <div
+                class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 md:p-10 shadow-sm max-w-3xl mx-auto">
+                <div class="text-center mb-8">
+                    <span
+                        class="text-label-sm font-label-sm text-primary tracking-wider uppercase font-semibold">Interactive
+                        Prototype</span>
+                    <h3 class="text-headline-lg font-headline-lg text-on-surface mt-1">Unified Authentication Hub</h3>
+                    <p class="text-body-sm font-body-sm text-on-surface-variant mt-1">Preview each user flow directly
+                        below with instantaneous client-side role toggling.</p>
+                </div>
+                <!-- Flow Route Switcher Tabs -->
+                <div
+                    class="flex flex-wrap gap-2 p-1.5 bg-surface-container-low border border-outline-variant rounded-lg mb-8 justify-center">
+                    <button
+                        class="px-3.5 py-1.5 rounded-md text-label-md font-label-md font-medium transition-colors duration-150 bg-surface-container-lowest text-on-surface shadow-xs"
+                        id="tab-patient-login" onclick="setAuthView('patient', 'login')">
+                        Patient Log In
+                    </button>
+                    <button
+                        class="px-3.5 py-1.5 rounded-md text-label-md font-label-md font-medium transition-colors duration-150 text-on-surface-variant hover:text-on-surface"
+                        id="tab-patient-register" onclick="setAuthView('patient', 'register')">
+                        Patient Register
+                    </button>
+                    <button
+                        class="px-3.5 py-1.5 rounded-md text-label-md font-label-md font-medium transition-colors duration-150 text-on-surface-variant hover:text-on-surface"
+                        id="tab-doctor-login" onclick="setAuthView('doctor', 'login')">
+                        Doctor Log In
+                    </button>
+                    <button
+                        class="px-3.5 py-1.5 rounded-md text-label-md font-label-md font-medium transition-colors duration-150 text-on-surface-variant hover:text-on-surface"
+                        id="tab-doctor-register" onclick="setAuthView('doctor', 'register')">
+                        Doctor Register
+                    </button>
+                </div>
+                <!-- FORM CONTAINER -->
+                <div id="auth-forms-container">
+                    <!-- 1. Patient Login Form -->
+                    <form class="space-y-4" id="form-patient-login"
+                        onsubmit="event.preventDefault(); showNotice('Patient logged in successfully.');">
+                        <div class="border-b border-outline-variant pb-3 mb-4">
+                            <h4 class="text-headline-md font-headline-md text-on-surface">Log in to Patient Portal</h4>
+                            <p class="text-body-sm font-body-sm text-on-surface-variant">Manage your clinical visits and
+                                records.</p>
+                        </div>
+                        <div>
+                            <label class="block text-label-md font-label-md text-on-surface mb-1"
+                                for="p-login-email">Email address</label>
+                            <input
+                                class="w-full h-[42px] px-3.5 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 text-body-md outline-none transition"
+                                id="p-login-email" placeholder="name@example.com" required="" type="email">
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-between mb-1">
+                                <label class="text-label-md font-label-md text-on-surface"
+                                    for="p-login-pass">Password</label>
+                                <a class="text-body-sm font-body-sm text-primary hover:underline" href="#">Forgot
+                                    password?</a>
+                            </div>
+                            <input
+                                class="w-full h-[42px] px-3.5 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 text-body-md outline-none transition"
+                                id="p-login-pass" placeholder="••••••••" required="" type="password">
+                        </div>
+                        <div class="flex items-center space-x-2 pt-1">
+                            <input class="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary"
+                                id="p-login-remember" type="checkbox">
+                            <label class="text-body-sm font-body-sm text-on-surface-variant"
+                                for="p-login-remember">Remember me for 30 days</label>
+                        </div>
+                        <button
+                            class="w-full h-[42px] bg-primary-container hover:bg-primary text-on-primary rounded-lg text-label-md font-label-md font-medium transition active:scale-95 shadow-sm mt-2"
+                            type="submit">
+                            Log in to MedConnect
+                        </button>
+                    </form>
+                    <!-- 2. Patient Register Form -->
+                    <form class="space-y-4 hidden" id="form-patient-register"
+                        onsubmit="event.preventDefault(); showNotice('Patient account created successfully.');">
+                        <div class="border-b border-outline-variant pb-3 mb-4">
+                            <h4 class="text-headline-md font-headline-md text-on-surface">Create your Patient Account
+                            </h4>
+                            <p class="text-body-sm font-body-sm text-on-surface-variant">Begin connecting with
+                                accredited providers.</p>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-label-md font-label-md text-on-surface mb-1">First Name</label>
+                                <input
+                                    class="w-full h-[42px] px-3.5 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 text-body-md outline-none transition"
+                                    placeholder="Elena" required="" type="text">
+                            </div>
+                            <div>
+                                <label class="block text-label-md font-label-md text-on-surface mb-1">Last Name</label>
+                                <input
+                                    class="w-full h-[42px] px-3.5 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 text-body-md outline-none transition"
+                                    placeholder="Rostova" required="" type="text">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-label-md font-label-md text-on-surface mb-1">Email</label>
+                                <input
+                                    class="w-full h-[42px] px-3.5 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 text-body-md outline-none transition"
+                                    placeholder="elena@example.com" required="" type="email">
+                            </div>
+                            <div>
+                                <label class="block text-label-md font-label-md text-on-surface mb-1">Phone
+                                    Number</label>
+                                <input
+                                    class="w-full h-[42px] px-3.5 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 text-body-md outline-none transition"
+                                    placeholder="+1 (555) 019-2834" required="" type="tel">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-label-md font-label-md text-on-surface mb-1">Password</label>
+                                <input
+                                    class="w-full h-[42px] px-3.5 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 text-body-md outline-none transition"
+                                    placeholder="At least 8 characters" required="" type="password">
+                            </div>
+                            <div>
+                                <label class="block text-label-md font-label-md text-on-surface mb-1">Confirm
+                                    Password</label>
+                                <input
+                                    class="w-full h-[42px] px-3.5 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 text-body-md outline-none transition"
+                                    placeholder="Re-type password" required="" type="password">
+                            </div>
+                        </div>
+                        <button
+                            class="w-full h-[42px] bg-primary-container hover:bg-primary text-on-primary rounded-lg text-label-md font-label-md font-medium transition active:scale-95 shadow-sm mt-2"
+                            type="submit">
+                            Create Patient Account
+                        </button>
+                    </form>
+                    <!-- 3. Doctor Login Form -->
+                    <form class="space-y-4 hidden" id="form-doctor-login"
+                        onsubmit="event.preventDefault(); showNotice('Doctor authenticated successfully.');">
+                        <div class="border-b border-outline-variant pb-3 mb-4">
+                            <h4 class="text-headline-md font-headline-md text-on-surface">Physician Clinical Portal</h4>
+                            <p class="text-body-sm font-body-sm text-on-surface-variant">Sign in with your clinical
+                                credentials.</p>
+                        </div>
+                        <div>
+                            <label class="block text-label-md font-label-md text-on-surface mb-1">Clinical Email</label>
+                            <input
+                                class="w-full h-[42px] px-3.5 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-secondary focus:ring-2 focus:ring-secondary/20 text-body-md outline-none transition"
+                                placeholder="dr.smith@hospital.org" required="" type="email">
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-between mb-1">
+                                <label class="text-label-md font-label-md text-on-surface">Password</label>
+                                <a class="text-body-sm font-body-sm text-secondary hover:underline" href="#">Hospital
+                                    SSO help?</a>
+                            </div>
+                            <input
+                                class="w-full h-[42px] px-3.5 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-secondary focus:ring-2 focus:ring-secondary/20 text-body-md outline-none transition"
+                                placeholder="••••••••" required="" type="password">
+                        </div>
+                        <div class="flex items-center space-x-2 pt-1">
+                            <input class="w-4 h-4 rounded border-outline-variant text-secondary focus:ring-secondary"
+                                id="d-login-remember" type="checkbox">
+                            <label class="text-body-sm font-body-sm text-on-surface-variant" for="d-login-remember">Keep
+                                clinical session alive</label>
+                        </div>
+                        <button
+                            class="w-full h-[42px] bg-secondary hover:bg-on-secondary-fixed-variant text-on-secondary rounded-lg text-label-md font-label-md font-medium transition active:scale-95 shadow-sm mt-2"
+                            type="submit">
+                            Log in to Clinical Workspace
+                        </button>
+                    </form>
+                    <!-- 4. Doctor Register Form -->
+                    <form class="space-y-4 hidden" id="form-doctor-register"
+                        onsubmit="event.preventDefault(); showNotice('Physician application submitted for credentialing verification.');">
+                        <div class="border-b border-outline-variant pb-3 mb-4">
+                            <h4 class="text-headline-md font-headline-md text-on-surface">Join the MedConnect Provider
+                                Network</h4>
+                            <p class="text-body-sm font-body-sm text-on-surface-variant">Credentialed onboarding for
+                                licensed medical doctors.</p>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-label-md font-label-md text-on-surface mb-1">First Name</label>
+                                <input
+                                    class="w-full h-[42px] px-3.5 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-secondary focus:ring-2 focus:ring-secondary/20 text-body-md outline-none transition"
+                                    placeholder="Julian" required="" type="text">
+                            </div>
+                            <div>
+                                <label class="block text-label-md font-label-md text-on-surface mb-1">Last Name</label>
+                                <input
+                                    class="w-full h-[42px] px-3.5 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-secondary focus:ring-2 focus:ring-secondary/20 text-body-md outline-none transition"
+                                    placeholder="Vance, M.D." required="" type="text">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-label-md font-label-md text-on-surface mb-1">Work Email</label>
+                                <input
+                                    class="w-full h-[42px] px-3.5 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-secondary focus:ring-2 focus:ring-secondary/20 text-body-md outline-none transition"
+                                    placeholder="dr.vance@clinic.org" required="" type="email">
+                            </div>
+                            <div>
+                                <label class="block text-label-md font-label-md text-on-surface mb-1">Clinical
+                                    Phone</label>
+                                <input
+                                    class="w-full h-[42px] px-3.5 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-secondary focus:ring-2 focus:ring-secondary/20 text-body-md outline-none transition"
+                                    placeholder="+1 (555) 839-2049" required="" type="tel">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-label-md font-label-md text-on-surface mb-1">Medical License
+                                    Number (NPI)</label>
+                                <input
+                                    class="w-full h-[42px] px-3.5 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-secondary focus:ring-2 focus:ring-secondary/20 text-body-md outline-none transition"
+                                    placeholder="10-digit NPI identifier" required="" type="text">
+                            </div>
+                            <div>
+                                <label class="block text-label-md font-label-md text-on-surface mb-1">Primary
+                                    Specialization</label>
+                                <select
+                                    class="w-full h-[42px] px-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-secondary focus:ring-2 focus:ring-secondary/20 text-body-md outline-none transition">
+                                    <option>Internal Medicine</option>
+                                    <option>Family Medicine</option>
+                                    <option>Pediatrics</option>
+                                    <option>Cardiology</option>
+                                    <option>Dermatology</option>
+                                    <option>Psychiatry / Behavioral</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-label-md font-label-md text-on-surface mb-1">Portal
+                                Password</label>
+                            <input
+                                class="w-full h-[42px] px-3.5 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-secondary focus:ring-2 focus:ring-secondary/20 text-body-md outline-none transition"
+                                placeholder="Min 10 characters with numbers and symbols" required="" type="password">
+                        </div>
+                        <button
+                            class="w-full h-[42px] bg-secondary hover:bg-on-secondary-fixed-variant text-on-secondary rounded-lg text-label-md font-label-md font-medium transition active:scale-95 shadow-sm mt-2"
+                            type="submit">
+                            Submit Physician Credentialing Application
+                        </button>
+                    </form>
+                </div>
+                <div class="mt-4 hidden p-3 rounded-lg bg-emerald-50 text-emerald-800 text-body-sm font-body-sm border border-emerald-200 text-center"
+                    id="status-notice"></div>
+            </div>
+        </section>
+        <!-- Call to Action Banner -->
+        <section class="max-w-max-width-content mx-auto px-6 md:px-12 pb-16">
+            <div
+                class="bg-primary text-on-primary rounded-xl p-8 md:p-12 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="space-y-2 max-w-xl">
+                    <h3 class="text-headline-lg font-headline-lg font-bold">Ready to modernize your healthcare journey?
+                    </h3>
+                    <p class="text-body-md font-body-md text-primary-fixed-dim">Join thousands of patients and verified
+                        doctors collaborating in a single secure platform.</p>
+                </div>
+                <div class="flex items-center space-x-3 shrink-0">
+                    <button
+                        class="bg-surface-container-lowest text-primary hover:bg-surface-container-low text-label-md font-label-md font-medium px-5 py-2.5 rounded-lg transition active:scale-95"
+                        onclick="openAuthModal('patient', 'register')">
+                        Join as Patient
+                    </button>
+                    <button
+                        class="border border-on-primary hover:bg-white/10 text-on-primary text-label-md font-label-md font-medium px-5 py-2.5 rounded-lg transition active:scale-95"
+                        onclick="openAuthModal('doctor', 'register')">
+                        Join as Clinician
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+    <!-- Shared Component: Footer -->
+    <footer class="bg-surface-container-low border-t border-outline-variant w-full">
+        <div class="max-w-max-width-content mx-auto px-6 md:px-12 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
+                <div class="md:col-span-1 space-y-3">
+                    <div class="flex items-center space-x-2 text-on-surface">
+                        <div
+                            class="w-7 h-7 rounded bg-primary-container flex items-center justify-center text-on-primary">
+                            <span class="material-symbols-outlined text-[16px]"
+                                data-icon="health_and_safety">health_and_safety</span>
+                        </div>
+                        <span
+                            class="text-headline-md font-headline-md font-bold text-on-surface tracking-tight">MedConnect</span>
+                    </div>
+                    <p class="text-body-sm font-body-sm text-on-surface-variant">Connecting patients with better care.
+                    </p>
+                </div>
+                <div>
+                    <h5 class="text-label-md font-label-md font-semibold text-on-surface mb-3">Explore</h5>
+                    <ul class="space-y-2 text-body-sm font-body-sm text-on-surface-variant">
+                        <li class=""><a class="hover:text-primary transition-colors duration-150" href="#">Find a
+                                Doctor</a></li>
+                        <li class=""><a class="hover:text-primary transition-colors duration-150" href="#">How It
+                                Works</a></li>
+                        <li class=""><a class="hover:text-primary transition-colors duration-150" href="#">For
+                                Doctors</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="text-label-md font-label-md font-semibold text-on-surface mb-3">Portals</h5>
+                    <ul class="space-y-2 text-body-sm font-body-sm text-on-surface-variant">
+                        <li class=""><a class="hover:text-primary transition-colors duration-150"
+                                href="javascript:void(0)" onclick="openAuthModal('patient', 'login')">Patient Portal</a>
+                        </li>
+                        <li class=""><a class="hover:text-primary transition-colors duration-150"
+                                href="javascript:void(0)" onclick="openAuthModal('doctor', 'login')">Doctor Portal</a>
+                        </li>
+                        <li class=""><a class="hover:text-primary transition-colors duration-150" href="#">Clinical
+                                Standards</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="text-label-md font-label-md font-semibold text-on-surface mb-3">Legal &amp; Compliance
+                    </h5>
+                    <ul class="space-y-2 text-body-sm font-body-sm text-on-surface-variant">
+                        <li class=""><a class="hover:text-primary transition-colors duration-150" href="#">Privacy
+                                Policy</a></li>
+                        <li class=""><a class="hover:text-primary transition-colors duration-150" href="#">Terms of
+                                Service</a></li>
+                        <li class=""><a class="hover:text-primary transition-colors duration-150" href="#">HIPAA
+                                Compliance</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div
+                class="pt-8 border-t border-outline-variant text-center md:text-left text-body-sm font-body-sm text-on-surface-variant flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="">© 2024 MedConnect Inc. All rights reserved. HIPAA Compliant &amp; Certified.</div>
+                <div class="flex items-center space-x-4">
+                    <span
+                        class="inline-flex items-center text-label-sm font-label-sm text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded border border-emerald-200">
+                        Systems Operational
+                    </span>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- Simple script for interactive view switching -->
+    <script>
+        function setAuthView(role, action) {
+            const tabs = ['patient-login', 'patient-register', 'doctor-login', 'doctor-register'];
+            const currentTarget = `${role}-${action}`;
+
+            // Reset tabs style
+            tabs.forEach(tab => {
+                const tabEl = document.getElementById(`tab-${tab}`);
+                const formEl = document.getElementById(`form-${tab}`);
+                if (tabEl) {
+                    if (tab === currentTarget) {
+                        tabEl.className = "px-3.5 py-1.5 rounded-md text-label-md font-label-md font-medium transition-colors duration-150 bg-surface-container-lowest text-on-surface shadow-xs";
+                    } else {
+                        tabEl.className = "px-3.5 py-1.5 rounded-md text-label-md font-label-md font-medium transition-colors duration-150 text-on-surface-variant hover:text-on-surface";
+                    }
+                }
+                if (formEl) {
+                    formEl.classList.toggle('hidden', tab !== currentTarget);
+                }
+            });
+
+            const notice = document.getElementById('status-notice');
+            if (notice) notice.classList.add('hidden');
+        }
+
+        function openAuthModal(role, action) {
+            setAuthView(role, action);
+            const hub = document.getElementById('auth-forms-container');
+            if (hub) {
+                hub.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        function showNotice(msg) {
+            const notice = document.getElementById('status-notice');
+            if (notice) {
+                notice.textContent = msg;
+                notice.classList.remove('hidden');
+                setTimeout(() => {
+                    notice.classList.add('hidden');
+                }, 4000);
+            }
+        }
+    </script>
+
+
+
+
+</body>
+
+</html>
