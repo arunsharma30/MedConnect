@@ -6,9 +6,7 @@ const Header = ({ onOpenAuth }) => {
       <div className="max-w-max-width-content mx-auto h-16 px-6 md:px-12 flex items-center justify-between">
         <div className="flex items-center space-x-8">
           <a className="flex items-center space-x-2.5 text-on-surface" href="#">
-            <div className="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center text-on-primary">
-              <span className="material-symbols-outlined text-[20px]">health_and_safety</span>
-            </div>
+            <img src="/logo.png" alt="MedConnect Logo" className="w-8 h-8 object-contain" />
             <span className="text-headline-md font-headline-md font-bold tracking-tight text-on-surface">MedConnect</span>
           </a>
           <nav className="hidden md:flex items-center space-x-6">

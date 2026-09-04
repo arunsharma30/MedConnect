@@ -7,9 +7,7 @@ const Footer = ({ onOpenAuth }) => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
           <div className="md:col-span-1">
             <a className="flex items-center space-x-2.5 text-on-surface mb-4" href="#">
-              <div className="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center text-on-primary">
-                <span className="material-symbols-outlined text-[20px]">health_and_safety</span>
-              </div>
+              <img src="/logo.png" alt="MedConnect Logo" className="w-8 h-8 object-contain grayscale opacity-80" />
               <span className="text-headline-md font-headline-md font-bold tracking-tight text-on-surface">MedConnect</span>
             </a>
             <p className="text-body-sm font-body-sm text-on-surface-variant leading-relaxed">

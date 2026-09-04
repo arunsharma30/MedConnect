@@ -1,19 +1,52 @@
 import React, { useState, forwardRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { supabase } from '../lib/supabase';
+import { useNavigate } from 'react-router-dom';
 
 const AuthModal = forwardRef(({ authView, setAuthView }, ref) => {
   const [notice, setNotice] = useState(null);
+  const [errorNotice, setErrorNotice] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  // Form States
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [npi, setNpi] = useState('');
+  const [specialty, setSpecialty] = useState('');
+
+  const clearForm = () => {
+    setEmail('');
+    setPassword('');
+    setConfirmPassword('');
+    setFirstName('');
+    setLastName('');
+    setPhone('');
+    setNpi('');
+    setSpecialty('');
+  };
 
   const showNotice = (msg) => {
     setNotice(msg);
-    setTimeout(() => {
-      setNotice(null);
-    }, 4000);
+    setErrorNotice(null);
+    setTimeout(() => setNotice(null), 5000);
+  };
+
+  const showError = (msg) => {
+    setErrorNotice(msg);
+    setNotice(null);
+    setTimeout(() => setErrorNotice(null), 5000);
   };
 
   const handleTabClick = (role, action) => {
     setAuthView({ role, action });
     setNotice(null);
+    setErrorNotice(null);
+    clearForm();
   };
 
   const currentTarget = `${authView.role}-${authView.action}`;
@@ -25,9 +58,132 @@ const AuthModal = forwardRef(({ authView, setAuthView }, ref) => {
     return "px-3.5 py-1.5 rounded-md text-label-md font-label-md font-medium transition-all duration-300 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-lowest/50";
   };
 
-  const handleFormSubmit = (e, msg) => {
+  const handleForgotPassword = async (e) => {
     e.preventDefault();
-    showNotice(msg);
+    if (!email) {
+      showError("Please enter your email first to reset your password.");
+      return;
+    }
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setLoading(false);
+    if (error) {
+      showError(error.message);
+    } else {
+      showNotice("Password reset link sent! Check your email.");
+    }
+  };
+
+  const handleLogin = async (e, expectedRole) => {
+    e.preventDefault();
+    setLoading(true);
+    setErrorNotice(null);
+    setNotice(null);
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      showError(error.message === 'Invalid login credentials' ? 'Incorrect email or password.' : error.message);
+      setLoading(false);
+      return;
+    }
+
+    // Verify role
+    if (data?.user) {
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('auth_id', data.user.id)
+        .single();
+
+      if (profileError) {
+        showError("Unable to verify user profile.");
+        await supabase.auth.signOut();
+      } else if (profile.role !== expectedRole) {
+        showError(`This account is registered as a ${profile.role}. Please use ${profile.role === 'patient' ? 'Patient' : 'Doctor'} Login.`);
+        await supabase.auth.signOut();
+      } else {
+        // Success
+        navigate(`/${expectedRole}/dashboard`);
+      }
+    }
+    setLoading(false);
+  };
+
+  const handleRegister = async (e, role) => {
+    e.preventDefault();
+    setLoading(true);
+    setErrorNotice(null);
+    setNotice(null);
+
+    if (password !== confirmPassword) {
+      showError("Passwords do not match.");
+      setLoading(false);
+      return;
+    }
+
+    if (password.length < 8) {
+      showError("Your password does not meet the required security requirements (minimum 8 characters).");
+      setLoading(false);
+      return;
+    }
+
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          role: role,
+          first_name: firstName,
+          last_name: lastName,
+        }
+      }
+    });
+
+    if (error) {
+      showError(error.message);
+      setLoading(false);
+      return;
+    }
+
+    // If role is doctor, we must also insert into doctors table when profile triggers creation
+    // However, the trigger on auth.users creates public.profiles asynchronously.
+    // It's safer to let the user login later and complete their profile, or we handle the doctor insert here if the profile exists.
+    // For now, we wait to see if the session is created. If email confirmation is enabled, session is null.
+    
+    if (data?.user && data.session === null) {
+      showNotice("Account created. Please check your email to verify your account.");
+      clearForm();
+    } else if (data?.user && data.session) {
+      
+      // Attempt to wait briefly for trigger to create profile
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      if (role === 'doctor' && npi) {
+        const { data: profile } = await supabase.from('profiles').select('id').eq('auth_id', data.user.id).single();
+        if (profile) {
+          await supabase.from('doctors').insert({ profile_id: profile.id, license_number: npi, consultation_fee: 0 });
+        }
+      }
+      
+      if (role === 'patient' && phone) {
+        // Phone is in profiles, we can update it
+        const { data: profile } = await supabase.from('profiles').select('id').eq('auth_id', data.user.id).single();
+        if (profile) {
+          await supabase.from('profiles').update({ phone }).eq('id', profile.id);
+          await supabase.from('patients').insert({ profile_id: profile.id });
+        }
+      }
+
+      navigate(`/${role}/dashboard`);
+    }
+
+    setLoading(false);
   };
 
   const formVariants = {
@@ -63,12 +219,23 @@ const AuthModal = forwardRef(({ authView, setAuthView }, ref) => {
               <span>{notice}</span>
             </motion.div>
           )}
+          {errorNotice && (
+            <motion.div 
+              initial={{ opacity: 0, y: -20, x: '-50%' }}
+              animate={{ opacity: 1, y: 0, x: '-50%' }}
+              exit={{ opacity: 0, y: -20, x: '-50%' }}
+              className="absolute top-4 left-1/2 bg-error/10 text-error px-4 py-2 rounded-lg shadow-lg z-20 text-body-sm border border-error/20 flex items-center space-x-2 whitespace-nowrap"
+            >
+              <span className="material-symbols-outlined text-[18px]">error</span>
+              <span>{errorNotice}</span>
+            </motion.div>
+          )}
         </AnimatePresence>
 
         <div className="text-center mb-8 relative z-10">
-          <span className="text-label-sm font-label-sm text-primary tracking-wider uppercase font-semibold">Interactive Prototype</span>
+          <span className="text-label-sm font-label-sm text-primary tracking-wider uppercase font-semibold">Secure Authentication</span>
           <h3 className="text-headline-lg font-headline-lg text-on-surface mt-1">Unified Authentication Hub</h3>
-          <p className="text-body-sm font-body-sm text-on-surface-variant mt-1">Preview each user flow directly below with instantaneous client-side role toggling.</p>
+          <p className="text-body-sm font-body-sm text-on-surface-variant mt-1">Sign in or register to access MedConnect securely via Supabase Auth.</p>
         </div>
         
         {/* Flow Route Switcher Tabs */}
@@ -108,7 +275,7 @@ const AuthModal = forwardRef(({ authView, setAuthView }, ref) => {
                 key="patient-login"
                 variants={formVariants} initial="initial" animate="animate" exit="exit"
                 className="space-y-5" 
-                onSubmit={(e) => handleFormSubmit(e, 'Patient logged in successfully.')}
+                onSubmit={(e) => handleLogin(e, 'patient')}
               >
                 <div className="border-b border-outline-variant/50 pb-4 mb-5">
                   <h4 className="text-headline-md font-headline-md text-on-surface">Log in to Patient Portal</h4>
@@ -119,27 +286,25 @@ const AuthModal = forwardRef(({ authView, setAuthView }, ref) => {
                   <input
                     className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-primary focus:ring-4 focus:ring-primary/10 text-body-md outline-none transition-all"
                     id="p-login-email" placeholder="name@example.com" required type="email"
+                    value={email} onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
                     <label className="text-label-md font-label-md text-on-surface" htmlFor="p-login-pass">Password</label>
-                    <a className="text-body-sm font-body-sm text-primary hover:underline" href="#">Forgot password?</a>
+                    <button type="button" onClick={handleForgotPassword} className="text-body-sm font-body-sm text-primary hover:underline">Forgot password?</button>
                   </div>
                   <input
                     className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-primary focus:ring-4 focus:ring-primary/10 text-body-md outline-none transition-all"
                     id="p-login-pass" placeholder="••••••••" required type="password"
+                    value={password} onChange={(e) => setPassword(e.target.value)}
                   />
                 </div>
-                <div className="flex items-center space-x-2 pt-2">
-                  <input className="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary" id="p-login-remember" type="checkbox" />
-                  <label className="text-body-sm font-body-sm text-on-surface-variant" htmlFor="p-login-remember">Remember me for 30 days</label>
-                </div>
                 <button
-                  className="w-full h-[46px] bg-primary-container hover:bg-primary text-on-primary rounded-xl text-label-md font-label-md font-medium transition-all active:scale-[0.98] shadow-md hover:shadow-lg mt-4"
-                  type="submit"
+                  className="w-full h-[46px] bg-primary-container hover:bg-primary text-on-primary rounded-xl text-label-md font-label-md font-medium transition-all active:scale-[0.98] shadow-md hover:shadow-lg mt-4 disabled:opacity-50"
+                  type="submit" disabled={loading}
                 >
-                  Log in to MedConnect
+                  {loading ? 'Signing in...' : 'Log in to MedConnect'}
                 </button>
               </motion.form>
             )}
@@ -150,7 +315,7 @@ const AuthModal = forwardRef(({ authView, setAuthView }, ref) => {
                 key="patient-register"
                 variants={formVariants} initial="initial" animate="animate" exit="exit"
                 className="space-y-5" 
-                onSubmit={(e) => handleFormSubmit(e, 'Patient account created successfully.')}
+                onSubmit={(e) => handleRegister(e, 'patient')}
               >
                 <div className="border-b border-outline-variant/50 pb-4 mb-5">
                   <h4 className="text-headline-md font-headline-md text-on-surface">Create your Patient Account</h4>
@@ -159,35 +324,35 @@ const AuthModal = forwardRef(({ authView, setAuthView }, ref) => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
                     <label className="block text-label-md font-label-md text-on-surface mb-1.5">First Name</label>
-                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-primary focus:ring-4 focus:ring-primary/10 text-body-md outline-none transition-all" placeholder="Elena" required type="text" />
+                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-primary focus:ring-4 focus:ring-primary/10 text-body-md outline-none transition-all" placeholder="Elena" required type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
                   </div>
                   <div>
                     <label className="block text-label-md font-label-md text-on-surface mb-1.5">Last Name</label>
-                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-primary focus:ring-4 focus:ring-primary/10 text-body-md outline-none transition-all" placeholder="Rostova" required type="text" />
+                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-primary focus:ring-4 focus:ring-primary/10 text-body-md outline-none transition-all" placeholder="Rostova" required type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
                     <label className="block text-label-md font-label-md text-on-surface mb-1.5">Email</label>
-                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-primary focus:ring-4 focus:ring-primary/10 text-body-md outline-none transition-all" placeholder="elena@example.com" required type="email" />
+                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-primary focus:ring-4 focus:ring-primary/10 text-body-md outline-none transition-all" placeholder="elena@example.com" required type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
                   </div>
                   <div>
                     <label className="block text-label-md font-label-md text-on-surface mb-1.5">Phone Number</label>
-                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-primary focus:ring-4 focus:ring-primary/10 text-body-md outline-none transition-all" placeholder="+1 (555) 019-2834" required type="tel" />
+                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-primary focus:ring-4 focus:ring-primary/10 text-body-md outline-none transition-all" placeholder="+1 (555) 019-2834" required type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
                     <label className="block text-label-md font-label-md text-on-surface mb-1.5">Password</label>
-                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-primary focus:ring-4 focus:ring-primary/10 text-body-md outline-none transition-all" placeholder="At least 8 characters" required type="password" />
+                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-primary focus:ring-4 focus:ring-primary/10 text-body-md outline-none transition-all" placeholder="At least 8 characters" required type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
                   </div>
                   <div>
                     <label className="block text-label-md font-label-md text-on-surface mb-1.5">Confirm Password</label>
-                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-primary focus:ring-4 focus:ring-primary/10 text-body-md outline-none transition-all" placeholder="Re-type password" required type="password" />
+                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-primary focus:ring-4 focus:ring-primary/10 text-body-md outline-none transition-all" placeholder="Re-type password" required type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
                   </div>
                 </div>
-                <button className="w-full h-[46px] bg-primary-container hover:bg-primary text-on-primary rounded-xl text-label-md font-label-md font-medium transition-all active:scale-[0.98] shadow-md hover:shadow-lg mt-4" type="submit">
-                  Create Patient Account
+                <button className="w-full h-[46px] bg-primary-container hover:bg-primary text-on-primary rounded-xl text-label-md font-label-md font-medium transition-all active:scale-[0.98] shadow-md hover:shadow-lg mt-4 disabled:opacity-50" type="submit" disabled={loading}>
+                  {loading ? 'Creating account...' : 'Create Patient Account'}
                 </button>
               </motion.form>
             )}
@@ -198,7 +363,7 @@ const AuthModal = forwardRef(({ authView, setAuthView }, ref) => {
                 key="doctor-login"
                 variants={formVariants} initial="initial" animate="animate" exit="exit"
                 className="space-y-5" 
-                onSubmit={(e) => handleFormSubmit(e, 'Doctor authenticated successfully.')}
+                onSubmit={(e) => handleLogin(e, 'doctor')}
               >
                 <div className="border-b border-outline-variant/50 pb-4 mb-5">
                   <h4 className="text-headline-md font-headline-md text-on-surface">Physician Clinical Portal</h4>
@@ -206,21 +371,17 @@ const AuthModal = forwardRef(({ authView, setAuthView }, ref) => {
                 </div>
                 <div>
                   <label className="block text-label-md font-label-md text-on-surface mb-1.5">Clinical Email</label>
-                  <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" placeholder="dr.smith@hospital.org" required type="email" />
+                  <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" placeholder="dr.smith@hospital.org" required type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
                 </div>
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
                     <label className="text-label-md font-label-md text-on-surface">Password</label>
-                    <a className="text-body-sm font-body-sm text-secondary hover:underline" href="#">Hospital SSO help?</a>
+                    <button type="button" onClick={handleForgotPassword} className="text-body-sm font-body-sm text-secondary hover:underline">Forgot password?</button>
                   </div>
-                  <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" placeholder="••••••••" required type="password" />
+                  <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" placeholder="••••••••" required type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
                 </div>
-                <div className="flex items-center space-x-2 pt-2">
-                  <input className="w-4 h-4 rounded border-outline-variant text-secondary focus:ring-secondary" id="d-login-remember" type="checkbox" />
-                  <label className="text-body-sm font-body-sm text-on-surface-variant" htmlFor="d-login-remember">Keep clinical session alive</label>
-                </div>
-                <button className="w-full h-[46px] bg-secondary hover:bg-on-secondary-fixed-variant text-on-secondary rounded-xl text-label-md font-label-md font-medium transition-all active:scale-[0.98] shadow-md hover:shadow-lg mt-4" type="submit">
-                  Log in to Clinical Workspace
+                <button className="w-full h-[46px] bg-secondary hover:bg-on-secondary-fixed-variant text-on-secondary rounded-xl text-label-md font-label-md font-medium transition-all active:scale-[0.98] shadow-md hover:shadow-lg mt-4 disabled:opacity-50" type="submit" disabled={loading}>
+                  {loading ? 'Signing in...' : 'Log in to Clinical Workspace'}
                 </button>
               </motion.form>
             )}
@@ -231,7 +392,7 @@ const AuthModal = forwardRef(({ authView, setAuthView }, ref) => {
                 key="doctor-register"
                 variants={formVariants} initial="initial" animate="animate" exit="exit"
                 className="space-y-5" 
-                onSubmit={(e) => handleFormSubmit(e, 'Physician application submitted for credentialing verification.')}
+                onSubmit={(e) => handleRegister(e, 'doctor')}
               >
                 <div className="border-b border-outline-variant/50 pb-4 mb-5">
                   <h4 className="text-headline-md font-headline-md text-on-surface">Join the MedConnect Provider Network</h4>
@@ -240,21 +401,21 @@ const AuthModal = forwardRef(({ authView, setAuthView }, ref) => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
                     <label className="block text-label-md font-label-md text-on-surface mb-1.5">First Name</label>
-                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" placeholder="Julian" required type="text" />
+                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" placeholder="Julian" required type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
                   </div>
                   <div>
                     <label className="block text-label-md font-label-md text-on-surface mb-1.5">Last Name</label>
-                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" placeholder="Vance, M.D." required type="text" />
+                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" placeholder="Vance, M.D." required type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-label-md font-label-md text-on-surface mb-1.5">NPI Number</label>
-                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" placeholder="10-digit NPI" required type="text" />
+                    <label className="block text-label-md font-label-md text-on-surface mb-1.5">License Number (NPI)</label>
+                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" placeholder="10-digit NPI" required type="text" value={npi} onChange={(e) => setNpi(e.target.value)} />
                   </div>
                   <div>
                     <label className="block text-label-md font-label-md text-on-surface mb-1.5">Specialty</label>
-                    <select className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" required defaultValue="">
+                    <select className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" required value={specialty} onChange={(e) => setSpecialty(e.target.value)}>
                       <option value="" disabled>Select specialty...</option>
                       <option value="pcp">Primary Care</option>
                       <option value="cardio">Cardiology</option>
@@ -267,25 +428,25 @@ const AuthModal = forwardRef(({ authView, setAuthView }, ref) => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
                     <label className="block text-label-md font-label-md text-on-surface mb-1.5">Clinical Email</label>
-                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" placeholder="dr.vance@hospital.org" required type="email" />
+                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" placeholder="dr.vance@hospital.org" required type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
                   </div>
                   <div>
                     <label className="block text-label-md font-label-md text-on-surface mb-1.5">Direct Phone</label>
-                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" placeholder="+1 (555) 019-2834" required type="tel" />
+                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" placeholder="+1 (555) 019-2834" required type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
                     <label className="block text-label-md font-label-md text-on-surface mb-1.5">Password</label>
-                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" placeholder="High security required" required type="password" />
+                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" placeholder="High security required" required type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
                   </div>
                   <div>
                     <label className="block text-label-md font-label-md text-on-surface mb-1.5">Confirm Password</label>
-                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" placeholder="Re-type password" required type="password" />
+                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" placeholder="Re-type password" required type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
                   </div>
                 </div>
-                <button className="w-full h-[46px] bg-secondary hover:bg-on-secondary-fixed-variant text-on-secondary rounded-xl text-label-md font-label-md font-medium transition-all active:scale-[0.98] shadow-md hover:shadow-lg mt-4" type="submit">
-                  Submit Physician Application
+                <button className="w-full h-[46px] bg-secondary hover:bg-on-secondary-fixed-variant text-on-secondary rounded-xl text-label-md font-label-md font-medium transition-all active:scale-[0.98] shadow-md hover:shadow-lg mt-4 disabled:opacity-50" type="submit" disabled={loading}>
+                  {loading ? 'Submitting...' : 'Submit Physician Application'}
                 </button>
               </motion.form>
             )}
