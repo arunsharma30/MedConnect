@@ -10,16 +10,20 @@ const AppointmentBooking = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const initialDoctorId = searchParams.get('doctor_id');
+  const initialDate = searchParams.get('date');
+  const initialTime = searchParams.get('time');
+  const initialMode = searchParams.get('mode') || 'online';
+  const initialReason = searchParams.get('reason') || '';
 
   const [loading, setLoading] = useState(false);
   const [patientId, setPatientId] = useState(null);
   
   // Selection
   const [selectedDoctorId, setSelectedDoctorId] = useState(initialDoctorId || '');
-  const [selectedDate, setSelectedDate] = useState('');
-  const [selectedTime, setSelectedTime] = useState('');
-  const [reason, setReason] = useState('');
-  const [mode, setMode] = useState('online');
+  const [selectedDate, setSelectedDate] = useState(initialDate || '');
+  const [selectedTime, setSelectedTime] = useState(initialTime || '');
+  const [reason, setReason] = useState(initialReason);
+  const [mode, setMode] = useState(initialMode);
 
   // Options
   const [doctors, setDoctors] = useState([]);

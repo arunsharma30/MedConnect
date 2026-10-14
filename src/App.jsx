@@ -21,6 +21,8 @@ import MedicalRecords from './pages/MedicalRecords';
 import ResetPassword from './pages/ResetPassword';
 import ProtectedRoute from './components/ProtectedRoute';
 import { useAuth } from './context/AuthContext';
+import DoctorProfile from './pages/DoctorProfile';
+import { DoctorPatientRecords, DoctorPrescriptions, DoctorDiagnostics, DoctorBilling } from './pages/DoctorStubs';
 
 function LandingPage({ handleOpenAuth, authModalRef, authView, setAuthView }) {
   return (
@@ -112,6 +114,14 @@ function App() {
         } 
       />
       <Route 
+        path="/patient/doctors/:doctorId" 
+        element={
+          <ProtectedRoute allowedRoles={['patient']}>
+            <DoctorProfile />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
         path="/patient/profile" 
         element={
           <ProtectedRoute allowedRoles={['patient']}>
@@ -148,6 +158,38 @@ function App() {
         element={
           <ProtectedRoute allowedRoles={['doctor']}>
             <ProfileSettings />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/doctor/patients" 
+        element={
+          <ProtectedRoute allowedRoles={['doctor']}>
+            <DoctorPatientRecords />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/doctor/prescriptions" 
+        element={
+          <ProtectedRoute allowedRoles={['doctor']}>
+            <DoctorPrescriptions />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/doctor/diagnostics" 
+        element={
+          <ProtectedRoute allowedRoles={['doctor']}>
+            <DoctorDiagnostics />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/doctor/billing" 
+        element={
+          <ProtectedRoute allowedRoles={['doctor']}>
+            <DoctorBilling />
           </ProtectedRoute>
         } 
       />

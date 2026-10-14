@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import DashboardLayout from '../components/DashboardLayout';
+import DoctorLayout from '../components/DoctorLayout';
 import { useAuth } from '../context/AuthContext';
 
 const DoctorAppointments = () => {
@@ -59,7 +59,7 @@ const DoctorAppointments = () => {
   };
 
   return (
-    <DashboardLayout>
+    <DoctorLayout pageTitle="Consultations">
       <div className="bg-white rounded-2xl shadow-sm border border-outline-variant/50 p-6 md:p-8">
         <div className="mb-8">
           <h1 className="text-headline-md text-on-surface">Consultations</h1>
@@ -141,7 +141,7 @@ const DoctorAppointments = () => {
           </div>
         )}
       </div>
-    </DashboardLayout>
+    </DoctorLayout>
   );
 };
 

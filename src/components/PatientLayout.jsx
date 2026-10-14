@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 
-const PatientLayout = ({ children }) => {
+const PatientLayout = ({ children, fullWidth = false }) => {
   const { profile } = useAuth();
   const navigate = useNavigate();
 
@@ -91,7 +91,7 @@ const PatientLayout = ({ children }) => {
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-grow w-full max-w-[72rem] mx-auto px-6 md:px-12 py-8 space-y-8">
+      <main className={`flex-grow w-full ${fullWidth ? '' : 'max-w-[72rem] mx-auto px-6 md:px-12 py-8 space-y-8'}`}>
         {children}
       </main>
 

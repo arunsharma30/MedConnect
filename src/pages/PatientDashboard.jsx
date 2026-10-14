@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import PatientLayout from '../components/PatientLayout';
+import AppointmentDetailsModal from '../components/AppointmentDetailsModal';
 
 const PatientDashboard = () => {
   const { profile } = useAuth();
@@ -12,6 +13,7 @@ const PatientDashboard = () => {
   const [careTeam, setCareTeam] = useState([]);
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedAptForDetails, setSelectedAptForDetails] = useState(null);
 
   useEffect(() => {
     if (profile) {
@@ -53,7 +55,7 @@ const PatientDashboard = () => {
     // 4. Fetch Active Prescriptions
     const { data: prescriptionData } = await supabase
       .from('prescriptions')
-      .select('*, prescription_items(dosage, frequency, duration, medicine_id, quantity), doctors(profiles(first_name, last_name))')
+      .select('*, appointments(appointment_number), prescription_items(dosage, frequency, duration, quantity, medicines(name)), doctors(qualification, specializations(name), hospitals!doctors_hospital_id_fkey(name, address, city), profiles(first_name, last_name, phone))')
       .eq('patient_id', patientId)
       .order('created_at', { ascending: false })
       .limit(5);
@@ -290,7 +292,18 @@ const PatientDashboard = () => {
                       </div>
                     </div>
                     <div className="flex items-center gap-2 self-end sm:self-center">
-                      <button className="px-3.5 py-1.5 rounded-lg border border-outline-variant text-label-md font-label-md font-medium text-on-surface hover:bg-surface-container-low transition-colors">
+                      <button 
+                        onClick={() => setSelectedAptForDetails({
+                          id: prescription.appointment_id || prescription.id,
+                          appointment_number: prescription.appointments?.appointment_number || 'RX',
+                          appointment_date: prescription.created_at,
+                          status: 'completed',
+                          mode: 'online',
+                          doctors: prescription.doctors,
+                          prescriptions: [prescription]
+                        })}
+                        className="px-3.5 py-1.5 rounded-lg border border-outline-variant text-label-md font-label-md font-medium text-on-surface hover:border-primary hover:text-primary hover:bg-surface-container-low transition-colors"
+                      >
                         Dosage Details
                       </button>
                     </div>
@@ -397,6 +410,13 @@ const PatientDashboard = () => {
           
         </div>
       </div>
+
+      {/* Prescription & Appointment Details Modal */}
+      <AppointmentDetailsModal
+        isOpen={!!selectedAptForDetails}
+        onClose={() => setSelectedAptForDetails(null)}
+        appointment={selectedAptForDetails}
+      />
     </PatientLayout>
   );
 };
