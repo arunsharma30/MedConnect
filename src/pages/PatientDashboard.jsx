@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import PatientLayout from '../components/PatientLayout';
 import AppointmentDetailsModal from '../components/AppointmentDetailsModal';
 
 const PatientDashboard = () => {
+  const navigate = useNavigate();
   const { profile } = useAuth();
   
   const [upcomingVisit, setUpcomingVisit] = useState(null);
@@ -231,10 +232,24 @@ const PatientDashboard = () => {
               {/* Action Buttons Bar */}
               <div className="mt-5 flex flex-wrap items-center gap-3 justify-between border-t border-outline-variant/70 pt-4">
                 <div className="flex items-center gap-2">
-                  <button className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary hover:bg-secondary active:scale-95 text-on-primary text-label-md font-label-md font-medium transition-all shadow-sm">
-                    <span className="material-symbols-outlined text-[18px]">meeting_room</span>
-                    Join Waiting Room
-                  </button>
+                  {upcomingVisit.mode === 'online' && upcomingVisit.status === 'confirmed' ? (
+                    <button 
+                      onClick={() => navigate(`/consultations/${upcomingVisit.id}/video`)}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary hover:bg-secondary active:scale-95 text-on-primary text-label-md font-label-md font-semibold transition-all shadow-sm"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">meeting_room</span>
+                      Join Consultation Room
+                    </button>
+                  ) : (
+                    <button 
+                      onClick={() => setSelectedAptForDetails(upcomingVisit)}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-surface-container-high text-on-surface-variant hover:text-on-surface text-label-md font-label-md font-medium transition-colors"
+                      title={upcomingVisit.status === 'pending' ? 'Appointment pending doctor confirmation' : 'View appointment details'}
+                    >
+                      <span className="material-symbols-outlined text-[18px]">visibility</span>
+                      View Appointment
+                    </button>
+                  )}
                   <button className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-surface-container-lowest border border-outline-variant text-on-surface hover:bg-surface-container-low text-label-md font-label-md font-medium transition-colors">
                     <span className="material-symbols-outlined text-[18px] text-on-surface-variant">edit_calendar</span>
                     Reschedule

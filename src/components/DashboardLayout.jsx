@@ -24,7 +24,11 @@ const DashboardLayout = ({ children }) => {
     { name: 'Dashboard', path: '/doctor/dashboard', icon: 'space_dashboard' },
     { name: 'Consultations', path: '/doctor/appointments', icon: 'calendar_month' },
     { name: 'Availability', path: '/doctor/availability', icon: 'event_available' },
-    { name: 'My Profile', path: '/doctor/profile', icon: 'person' },
+    { name: 'Patient Records', path: '/doctor/patients', icon: 'folder_shared' },
+    { name: 'Prescriptions', path: '/doctor/prescriptions', icon: 'prescriptions' },
+    { name: 'Diagnostics & Labs', path: '/doctor/diagnostics', icon: 'biotech' },
+    { name: 'Billing & Payouts', path: '/doctor/billing', icon: 'payments' },
+    { name: 'My Profile', path: '/doctor/profile', icon: 'manage_accounts' },
   ];
 
   const links = role === 'patient' ? patientLinks : doctorLinks;

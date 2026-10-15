@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const AppointmentDetailsModal = ({
   isOpen,
   onClose,
   appointment,
-  onOpenReview
+  onOpenReview,
+  onOpenPayment,
 }) => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('rx'); // 'rx' | 'overview'
 
   if (!isOpen || !appointment) return null;
@@ -393,6 +396,51 @@ const AppointmentDetailsModal = ({
                 </div>
               </div>
 
+              {/* Consultation Payment Card */}
+              <div className="p-4 rounded-xl border border-outline-variant/60 bg-surface-container-lowest flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                    appointment.payment_status === 'completed' 
+                      ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' 
+                      : 'bg-amber-50 text-amber-600 border border-amber-200'
+                  }`}>
+                    <span className="material-symbols-outlined text-[22px]">
+                      {appointment.payment_status === 'completed' ? 'check_circle' : 'payments'}
+                    </span>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-label-xs text-outline font-semibold uppercase">Consultation Fee</span>
+                      {appointment.payment_status === 'completed' ? (
+                        <span className="text-label-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                          Paid
+                        </span>
+                      ) : (
+                        <span className="text-label-xs font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
+                          Payment Pending
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-title-sm font-bold text-on-surface">
+                      ₹{Number(doctor?.consultation_fee || 500).toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+
+                {appointment.payment_status !== 'completed' && appointment.status !== 'cancelled' && onOpenPayment && (
+                  <button
+                    onClick={() => {
+                      onClose();
+                      onOpenPayment(appointment);
+                    }}
+                    className="px-4 py-2 bg-gradient-to-r from-primary to-secondary hover:opacity-95 text-on-primary rounded-lg text-label-sm font-semibold transition-all shadow-xs flex items-center gap-1.5 shrink-0"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">lock</span>
+                    Pay Fee Now
+                  </button>
+                )}
+              </div>
+
               {/* Reason for Consultation */}
               {appointment.reason && (
                 <div>
@@ -498,6 +546,19 @@ const AppointmentDetailsModal = ({
           </div>
 
           <div className="flex items-center gap-2 ml-auto">
+            {appointment.mode === 'online' && appointment.status === 'confirmed' && (
+              <button
+                onClick={() => {
+                  onClose();
+                  navigate(`/consultations/${appointment.id}/video`);
+                }}
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary hover:bg-secondary text-on-primary rounded-lg text-label-md font-semibold transition-colors shadow-xs"
+              >
+                <span className="material-symbols-outlined text-[18px]">videocam</span>
+                Join Video Call
+              </button>
+            )}
+
             {prescription && (
               <button
                 onClick={() => window.print()}
@@ -505,6 +566,19 @@ const AppointmentDetailsModal = ({
               >
                 <span className="material-symbols-outlined text-[18px]">print</span>
                 Print Prescription
+              </button>
+            )}
+
+            {appointment.payment_status !== 'completed' && appointment.status !== 'cancelled' && onOpenPayment && (
+              <button
+                onClick={() => {
+                  onClose();
+                  onOpenPayment(appointment);
+                }}
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-primary to-secondary hover:opacity-95 text-on-primary rounded-lg text-label-md font-semibold transition-all shadow-xs"
+              >
+                <span className="material-symbols-outlined text-[18px]">payments</span>
+                Pay Fee (₹{Number(doctor?.consultation_fee || 500).toFixed(2)})
               </button>
             )}
 

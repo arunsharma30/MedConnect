@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import DoctorLayout from '../components/DoctorLayout';
 import { useAuth } from '../context/AuthContext';
+import paymentService from '../services/paymentService';
 
 const DoctorAppointments = () => {
+  const navigate = useNavigate();
   const { profile } = useAuth();
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -56,6 +59,13 @@ const DoctorAppointments = () => {
 
   const updateStatus = async (id, newStatus) => {
     await supabase.from('appointments').update({ status: newStatus }).eq('id', id);
+    if (newStatus === 'completed') {
+      try {
+        await paymentService.releaseDoctorPayout(id);
+      } catch (err) {
+        console.warn('Non-fatal error releasing payout on completion:', err);
+      }
+    }
   };
 
   return (
@@ -127,7 +137,16 @@ const DoctorAppointments = () => {
                   )}
                   {apt.status === 'confirmed' && (
                     <>
-                      <button onClick={() => updateStatus(apt.id, 'completed')} className="px-4 py-2 bg-primary text-on-primary hover:bg-primary/90 rounded-lg text-label-md font-medium transition-colors w-full">
+                      {apt.mode === 'online' && (
+                        <button 
+                          onClick={() => navigate(`/consultations/${apt.id}/video`)}
+                          className="px-4 py-2 bg-primary hover:bg-secondary text-on-primary rounded-lg text-label-md font-semibold transition-all shadow-xs flex items-center justify-center gap-1.5 w-full active:scale-95"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">videocam</span>
+                          Start Video Call
+                        </button>
+                      )}
+                      <button onClick={() => updateStatus(apt.id, 'completed')} className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-label-md font-medium transition-colors w-full">
                         Mark Complete
                       </button>
                       <button onClick={() => updateStatus(apt.id, 'cancelled')} className="px-4 py-2 bg-surface-variant text-on-surface hover:bg-outline-variant rounded-lg text-label-md font-medium transition-colors w-full">

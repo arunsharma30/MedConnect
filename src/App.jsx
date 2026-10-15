@@ -23,6 +23,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { useAuth } from './context/AuthContext';
 import DoctorProfile from './pages/DoctorProfile';
 import { DoctorPatientRecords, DoctorPrescriptions, DoctorDiagnostics, DoctorBilling } from './pages/DoctorStubs';
+import VideoConsultationPage from './pages/VideoConsultationPage';
 
 function LandingPage({ handleOpenAuth, authModalRef, authView, setAuthView }) {
   return (
@@ -47,9 +48,44 @@ function App() {
   const navigate = useNavigate();
   const { user, role, loading } = useAuth();
 
-  // Redirect authenticated users trying to access the landing page to their respective dashboards
+  // Handle URL query parameters or direct routes for authentication
   useEffect(() => {
-    if (!loading && user && location.pathname === '/') {
+    const params = new URLSearchParams(location.search);
+    const roleParam = params.get('role');
+    const actionParam = params.get('action');
+
+    let targetRole = null;
+    let targetAction = null;
+
+    if (location.pathname === '/login') {
+      targetRole = 'patient';
+      targetAction = 'login';
+    } else if (location.pathname === '/register' || location.pathname === '/signup') {
+      targetRole = 'patient';
+      targetAction = 'register';
+    } else if (location.pathname === '/doctor/login') {
+      targetRole = 'doctor';
+      targetAction = 'login';
+    } else if (location.pathname === '/doctor/register' || location.pathname === '/doctor/signup') {
+      targetRole = 'doctor';
+      targetAction = 'register';
+    } else if (roleParam && (roleParam === 'patient' || roleParam === 'doctor')) {
+      targetRole = roleParam;
+      targetAction = (actionParam === 'register' || actionParam === 'signup') ? 'register' : 'login';
+    }
+
+    if (targetRole && targetAction) {
+      setAuthView({ role: targetRole, action: targetAction });
+      if (authModalRef.current) {
+        authModalRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  }, [location.pathname, location.search]);
+
+  // Redirect authenticated users trying to access auth/landing routes to their respective dashboards
+  useEffect(() => {
+    const isAuthRoute = ['/', '/login', '/register', '/doctor/login', '/doctor/register'].includes(location.pathname);
+    if (!loading && user && isAuthRoute) {
       if (role === 'patient') navigate('/patient/dashboard');
       if (role === 'doctor') navigate('/doctor/dashboard');
     }
@@ -66,6 +102,22 @@ function App() {
     <Routes>
       <Route 
         path="/" 
+        element={<LandingPage handleOpenAuth={handleOpenAuth} authModalRef={authModalRef} authView={authView} setAuthView={setAuthView} />} 
+      />
+      <Route 
+        path="/login" 
+        element={<LandingPage handleOpenAuth={handleOpenAuth} authModalRef={authModalRef} authView={authView} setAuthView={setAuthView} />} 
+      />
+      <Route 
+        path="/register" 
+        element={<LandingPage handleOpenAuth={handleOpenAuth} authModalRef={authModalRef} authView={authView} setAuthView={setAuthView} />} 
+      />
+      <Route 
+        path="/doctor/login" 
+        element={<LandingPage handleOpenAuth={handleOpenAuth} authModalRef={authModalRef} authView={authView} setAuthView={setAuthView} />} 
+      />
+      <Route 
+        path="/doctor/register" 
         element={<LandingPage handleOpenAuth={handleOpenAuth} authModalRef={authModalRef} authView={authView} setAuthView={setAuthView} />} 
       />
       <Route 
@@ -190,6 +242,14 @@ function App() {
         element={
           <ProtectedRoute allowedRoles={['doctor']}>
             <DoctorBilling />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/consultations/:appointmentId/video" 
+        element={
+          <ProtectedRoute allowedRoles={['patient', 'doctor', 'admin']}>
+            <VideoConsultationPage />
           </ProtectedRoute>
         } 
       />

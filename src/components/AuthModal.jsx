@@ -42,21 +42,27 @@ const AuthModal = forwardRef(({ authView, setAuthView }, ref) => {
     setTimeout(() => setErrorNotice(null), 5000);
   };
 
+  const handleSwitchAction = (action) => {
+    setAuthView(prev => ({ ...prev, action }));
+    setNotice(null);
+    setErrorNotice(null);
+  };
+
+  const handleRoleSwitch = (role) => {
+    setAuthView(prev => ({ role, action: prev.action || 'login' }));
+    setNotice(null);
+    setErrorNotice(null);
+  };
+
   const handleTabClick = (role, action) => {
     setAuthView({ role, action });
     setNotice(null);
     setErrorNotice(null);
-    clearForm();
   };
 
-  const currentTarget = `${authView.role}-${authView.action}`;
-
-  const getTabClass = (target) => {
-    if (target === currentTarget) {
-      return "px-3.5 py-1.5 rounded-md text-label-md font-label-md font-medium transition-all duration-300 bg-surface-container-lowest text-on-surface shadow-md border border-outline-variant scale-105 z-10";
-    }
-    return "px-3.5 py-1.5 rounded-md text-label-md font-label-md font-medium transition-all duration-300 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-lowest/50";
-  };
+  const currentRole = authView?.role || 'patient';
+  const currentAction = authView?.action || 'login';
+  const currentTarget = `${currentRole}-${currentAction}`;
 
   const handleForgotPassword = async (e) => {
     e.preventDefault();
@@ -232,37 +238,43 @@ const AuthModal = forwardRef(({ authView, setAuthView }, ref) => {
           )}
         </AnimatePresence>
 
-        <div className="text-center mb-8 relative z-10">
+        <div className="text-center mb-6 relative z-10">
           <span className="text-label-sm font-label-sm text-primary tracking-wider uppercase font-semibold">Secure Authentication</span>
-          <h3 className="text-headline-lg font-headline-lg text-on-surface mt-1">Unified Authentication Hub</h3>
-          <p className="text-body-sm font-body-sm text-on-surface-variant mt-1">Sign in or register to access MedConnect securely via Supabase Auth.</p>
+          <h3 className="text-headline-lg font-headline-lg text-on-surface mt-1">
+            {currentRole === 'doctor' ? 'Clinical Provider Workspace' : 'Patient Portal'}
+          </h3>
+          <p className="text-body-sm font-body-sm text-on-surface-variant mt-1">
+            {currentRole === 'doctor' 
+              ? 'Secure access for verified medical doctors and healthcare providers.'
+              : 'Sign in or register to access appointments, prescriptions, and records.'}
+          </p>
         </div>
         
-        {/* Flow Route Switcher Tabs */}
-        <div className="flex flex-wrap gap-2 p-1.5 bg-surface-container-low/50 backdrop-blur-sm border border-outline-variant/50 rounded-xl mb-10 justify-center relative z-10 shadow-inner">
+        {/* Role Segmented Selector: Patient vs Doctor */}
+        <div className="flex p-1 bg-surface-container-low/60 backdrop-blur-sm border border-outline-variant/50 rounded-xl mb-8 max-w-sm mx-auto shadow-inner relative z-10">
           <button
-            className={getTabClass('patient-login')}
-            onClick={() => handleTabClick('patient', 'login')}
+            type="button"
+            className={`flex-1 py-2 px-4 rounded-lg text-label-md font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
+              currentRole === 'patient'
+                ? 'bg-surface-container-lowest text-primary shadow-sm font-semibold border border-outline-variant/60'
+                : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-lowest/40'
+            }`}
+            onClick={() => handleRoleSwitch('patient')}
           >
-            Patient Log In
+            <span className="material-symbols-outlined text-[18px]">person</span>
+            <span>Patient Portal</span>
           </button>
           <button
-            className={getTabClass('patient-register')}
-            onClick={() => handleTabClick('patient', 'register')}
+            type="button"
+            className={`flex-1 py-2 px-4 rounded-lg text-label-md font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
+              currentRole === 'doctor'
+                ? 'bg-surface-container-lowest text-secondary shadow-sm font-semibold border border-outline-variant/60'
+                : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-lowest/40'
+            }`}
+            onClick={() => handleRoleSwitch('doctor')}
           >
-            Patient Register
-          </button>
-          <button
-            className={getTabClass('doctor-login')}
-            onClick={() => handleTabClick('doctor', 'login')}
-          >
-            Doctor Log In
-          </button>
-          <button
-            className={getTabClass('doctor-register')}
-            onClick={() => handleTabClick('doctor', 'register')}
-          >
-            Doctor Register
+            <span className="material-symbols-outlined text-[18px]">stethoscope</span>
+            <span>Doctor Portal</span>
           </button>
         </div>
 
@@ -278,7 +290,7 @@ const AuthModal = forwardRef(({ authView, setAuthView }, ref) => {
                 onSubmit={(e) => handleLogin(e, 'patient')}
               >
                 <div className="border-b border-outline-variant/50 pb-4 mb-5">
-                  <h4 className="text-headline-md font-headline-md text-on-surface">Log in to Patient Portal</h4>
+                  <h4 className="text-headline-md font-headline-md text-on-surface">Sign in to Patient Portal</h4>
                   <p className="text-body-sm font-body-sm text-on-surface-variant mt-1">Manage your clinical visits and records.</p>
                 </div>
                 <div>
@@ -304,8 +316,32 @@ const AuthModal = forwardRef(({ authView, setAuthView }, ref) => {
                   className="w-full h-[46px] bg-primary-container hover:bg-primary text-on-primary rounded-xl text-label-md font-label-md font-medium transition-all active:scale-[0.98] shadow-md hover:shadow-lg mt-4 disabled:opacity-50"
                   type="submit" disabled={loading}
                 >
-                  {loading ? 'Signing in...' : 'Log in to MedConnect'}
+                  {loading ? 'Signing in...' : 'Sign In'}
                 </button>
+
+                {/* Alternate Action: Switch to Sign Up */}
+                <div className="pt-3 text-center text-body-sm font-body-sm text-on-surface-variant">
+                  <span>Don't have an account? </span>
+                  <button
+                    type="button"
+                    onClick={() => handleSwitchAction('register')}
+                    className="text-primary font-semibold hover:underline focus:outline-none focus:ring-2 focus:ring-primary/20 rounded px-1 transition-colors"
+                  >
+                    Sign up
+                  </button>
+                </div>
+
+                {/* Cross-role Helper Link */}
+                <div className="pt-4 mt-2 border-t border-outline-variant/40 text-center">
+                  <button
+                    type="button"
+                    onClick={() => handleRoleSwitch('doctor')}
+                    className="inline-flex items-center gap-1.5 text-body-xs font-medium text-on-surface-variant hover:text-secondary transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">stethoscope</span>
+                    <span>Are you a healthcare provider? Doctor Sign In →</span>
+                  </button>
+                </div>
               </motion.form>
             )}
 
@@ -323,37 +359,61 @@ const AuthModal = forwardRef(({ authView, setAuthView }, ref) => {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-label-md font-label-md text-on-surface mb-1.5">First Name</label>
-                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-primary focus:ring-4 focus:ring-primary/10 text-body-md outline-none transition-all" placeholder="Elena" required type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+                    <label className="block text-label-md font-label-md text-on-surface mb-1.5" htmlFor="p-reg-firstname">First Name</label>
+                    <input id="p-reg-firstname" className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-primary focus:ring-4 focus:ring-primary/10 text-body-md outline-none transition-all" placeholder="Elena" required type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
                   </div>
                   <div>
-                    <label className="block text-label-md font-label-md text-on-surface mb-1.5">Last Name</label>
-                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-primary focus:ring-4 focus:ring-primary/10 text-body-md outline-none transition-all" placeholder="Rostova" required type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} />
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  <div>
-                    <label className="block text-label-md font-label-md text-on-surface mb-1.5">Email</label>
-                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-primary focus:ring-4 focus:ring-primary/10 text-body-md outline-none transition-all" placeholder="elena@example.com" required type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-                  </div>
-                  <div>
-                    <label className="block text-label-md font-label-md text-on-surface mb-1.5">Phone Number</label>
-                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-primary focus:ring-4 focus:ring-primary/10 text-body-md outline-none transition-all" placeholder="+1 (555) 019-2834" required type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
+                    <label className="block text-label-md font-label-md text-on-surface mb-1.5" htmlFor="p-reg-lastname">Last Name</label>
+                    <input id="p-reg-lastname" className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-primary focus:ring-4 focus:ring-primary/10 text-body-md outline-none transition-all" placeholder="Rostova" required type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-label-md font-label-md text-on-surface mb-1.5">Password</label>
-                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-primary focus:ring-4 focus:ring-primary/10 text-body-md outline-none transition-all" placeholder="At least 8 characters" required type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                    <label className="block text-label-md font-label-md text-on-surface mb-1.5" htmlFor="p-reg-email">Email</label>
+                    <input id="p-reg-email" className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-primary focus:ring-4 focus:ring-primary/10 text-body-md outline-none transition-all" placeholder="elena@example.com" required type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
                   </div>
                   <div>
-                    <label className="block text-label-md font-label-md text-on-surface mb-1.5">Confirm Password</label>
-                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-primary focus:ring-4 focus:ring-primary/10 text-body-md outline-none transition-all" placeholder="Re-type password" required type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+                    <label className="block text-label-md font-label-md text-on-surface mb-1.5" htmlFor="p-reg-phone">Phone Number</label>
+                    <input id="p-reg-phone" className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-primary focus:ring-4 focus:ring-primary/10 text-body-md outline-none transition-all" placeholder="+1 (555) 019-2834" required type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div>
+                    <label className="block text-label-md font-label-md text-on-surface mb-1.5" htmlFor="p-reg-pass">Password</label>
+                    <input id="p-reg-pass" className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-primary focus:ring-4 focus:ring-primary/10 text-body-md outline-none transition-all" placeholder="At least 8 characters" required type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="block text-label-md font-label-md text-on-surface mb-1.5" htmlFor="p-reg-confirm">Confirm Password</label>
+                    <input id="p-reg-confirm" className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-primary focus:ring-4 focus:ring-primary/10 text-body-md outline-none transition-all" placeholder="Re-type password" required type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
                   </div>
                 </div>
                 <button className="w-full h-[46px] bg-primary-container hover:bg-primary text-on-primary rounded-xl text-label-md font-label-md font-medium transition-all active:scale-[0.98] shadow-md hover:shadow-lg mt-4 disabled:opacity-50" type="submit" disabled={loading}>
-                  {loading ? 'Creating account...' : 'Create Patient Account'}
+                  {loading ? 'Creating account...' : 'Create Account'}
                 </button>
+
+                {/* Alternate Action: Switch to Sign In */}
+                <div className="pt-3 text-center text-body-sm font-body-sm text-on-surface-variant">
+                  <span>Already have an account? </span>
+                  <button
+                    type="button"
+                    onClick={() => handleSwitchAction('login')}
+                    className="text-primary font-semibold hover:underline focus:outline-none focus:ring-2 focus:ring-primary/20 rounded px-1 transition-colors"
+                  >
+                    Sign in
+                  </button>
+                </div>
+
+                {/* Cross-role Helper Link */}
+                <div className="pt-4 mt-2 border-t border-outline-variant/40 text-center">
+                  <button
+                    type="button"
+                    onClick={() => handleRoleSwitch('doctor')}
+                    className="inline-flex items-center gap-1.5 text-body-xs font-medium text-on-surface-variant hover:text-secondary transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">stethoscope</span>
+                    <span>Are you a licensed physician? Register as a doctor →</span>
+                  </button>
+                </div>
               </motion.form>
             )}
 
@@ -366,23 +426,47 @@ const AuthModal = forwardRef(({ authView, setAuthView }, ref) => {
                 onSubmit={(e) => handleLogin(e, 'doctor')}
               >
                 <div className="border-b border-outline-variant/50 pb-4 mb-5">
-                  <h4 className="text-headline-md font-headline-md text-on-surface">Physician Clinical Portal</h4>
+                  <h4 className="text-headline-md font-headline-md text-on-surface">Sign in to Clinical Portal</h4>
                   <p className="text-body-sm font-body-sm text-on-surface-variant mt-1">Sign in with your clinical credentials.</p>
                 </div>
                 <div>
-                  <label className="block text-label-md font-label-md text-on-surface mb-1.5">Clinical Email</label>
-                  <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" placeholder="dr.smith@hospital.org" required type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                  <label className="block text-label-md font-label-md text-on-surface mb-1.5" htmlFor="d-login-email">Clinical Email</label>
+                  <input id="d-login-email" className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" placeholder="dr.smith@hospital.org" required type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
                 </div>
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-label-md font-label-md text-on-surface">Password</label>
+                    <label className="text-label-md font-label-md text-on-surface" htmlFor="d-login-pass">Password</label>
                     <button type="button" onClick={handleForgotPassword} className="text-body-sm font-body-sm text-secondary hover:underline">Forgot password?</button>
                   </div>
-                  <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" placeholder="••••••••" required type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                  <input id="d-login-pass" className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" placeholder="••••••••" required type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
                 </div>
                 <button className="w-full h-[46px] bg-secondary hover:bg-on-secondary-fixed-variant text-on-secondary rounded-xl text-label-md font-label-md font-medium transition-all active:scale-[0.98] shadow-md hover:shadow-lg mt-4 disabled:opacity-50" type="submit" disabled={loading}>
-                  {loading ? 'Signing in...' : 'Log in to Clinical Workspace'}
+                  {loading ? 'Signing in...' : 'Sign In'}
                 </button>
+
+                {/* Alternate Action: Switch to Doctor Registration */}
+                <div className="pt-3 text-center text-body-sm font-body-sm text-on-surface-variant">
+                  <span>Don't have an account? </span>
+                  <button
+                    type="button"
+                    onClick={() => handleSwitchAction('register')}
+                    className="text-secondary font-semibold hover:underline focus:outline-none focus:ring-2 focus:ring-secondary/20 rounded px-1 transition-colors"
+                  >
+                    Register as a doctor
+                  </button>
+                </div>
+
+                {/* Cross-role Helper Link */}
+                <div className="pt-4 mt-2 border-t border-outline-variant/40 text-center">
+                  <button
+                    type="button"
+                    onClick={() => handleRoleSwitch('patient')}
+                    className="inline-flex items-center gap-1.5 text-body-xs font-medium text-on-surface-variant hover:text-primary transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">person</span>
+                    <span>Are you a patient? Go to Patient Portal →</span>
+                  </button>
+                </div>
               </motion.form>
             )}
 
@@ -400,22 +484,22 @@ const AuthModal = forwardRef(({ authView, setAuthView }, ref) => {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-label-md font-label-md text-on-surface mb-1.5">First Name</label>
-                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" placeholder="Julian" required type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+                    <label className="block text-label-md font-label-md text-on-surface mb-1.5" htmlFor="d-reg-firstname">First Name</label>
+                    <input id="d-reg-firstname" className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" placeholder="Julian" required type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
                   </div>
                   <div>
-                    <label className="block text-label-md font-label-md text-on-surface mb-1.5">Last Name</label>
-                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" placeholder="Vance, M.D." required type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+                    <label className="block text-label-md font-label-md text-on-surface mb-1.5" htmlFor="d-reg-lastname">Last Name</label>
+                    <input id="d-reg-lastname" className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" placeholder="Vance, M.D." required type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-label-md font-label-md text-on-surface mb-1.5">License Number (NPI)</label>
-                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" placeholder="10-digit NPI" required type="text" value={npi} onChange={(e) => setNpi(e.target.value)} />
+                    <label className="block text-label-md font-label-md text-on-surface mb-1.5" htmlFor="d-reg-npi">License Number (NPI)</label>
+                    <input id="d-reg-npi" className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" placeholder="10-digit NPI" required type="text" value={npi} onChange={(e) => setNpi(e.target.value)} />
                   </div>
                   <div>
-                    <label className="block text-label-md font-label-md text-on-surface mb-1.5">Specialty</label>
-                    <select className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" required value={specialty} onChange={(e) => setSpecialty(e.target.value)}>
+                    <label className="block text-label-md font-label-md text-on-surface mb-1.5" htmlFor="d-reg-specialty">Specialty</label>
+                    <select id="d-reg-specialty" className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" required value={specialty} onChange={(e) => setSpecialty(e.target.value)}>
                       <option value="" disabled>Select specialty...</option>
                       <option value="pcp">Primary Care</option>
                       <option value="cardio">Cardiology</option>
@@ -427,27 +511,51 @@ const AuthModal = forwardRef(({ authView, setAuthView }, ref) => {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-label-md font-label-md text-on-surface mb-1.5">Clinical Email</label>
-                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" placeholder="dr.vance@hospital.org" required type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                    <label className="block text-label-md font-label-md text-on-surface mb-1.5" htmlFor="d-reg-email">Clinical Email</label>
+                    <input id="d-reg-email" className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" placeholder="dr.vance@hospital.org" required type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
                   </div>
                   <div>
-                    <label className="block text-label-md font-label-md text-on-surface mb-1.5">Direct Phone</label>
-                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" placeholder="+1 (555) 019-2834" required type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
+                    <label className="block text-label-md font-label-md text-on-surface mb-1.5" htmlFor="d-reg-phone">Direct Phone</label>
+                    <input id="d-reg-phone" className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" placeholder="+1 (555) 019-2834" required type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-label-md font-label-md text-on-surface mb-1.5">Password</label>
-                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" placeholder="High security required" required type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                    <label className="block text-label-md font-label-md text-on-surface mb-1.5" htmlFor="d-reg-pass">Password</label>
+                    <input id="d-reg-pass" className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" placeholder="High security required" required type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
                   </div>
                   <div>
-                    <label className="block text-label-md font-label-md text-on-surface mb-1.5">Confirm Password</label>
-                    <input className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" placeholder="Re-type password" required type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+                    <label className="block text-label-md font-label-md text-on-surface mb-1.5" htmlFor="d-reg-confirm">Confirm Password</label>
+                    <input id="d-reg-confirm" className="w-full h-[46px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest/50 text-on-surface focus:border-secondary focus:ring-4 focus:ring-secondary/10 text-body-md outline-none transition-all" placeholder="Re-type password" required type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
                   </div>
                 </div>
                 <button className="w-full h-[46px] bg-secondary hover:bg-on-secondary-fixed-variant text-on-secondary rounded-xl text-label-md font-label-md font-medium transition-all active:scale-[0.98] shadow-md hover:shadow-lg mt-4 disabled:opacity-50" type="submit" disabled={loading}>
                   {loading ? 'Submitting...' : 'Submit Physician Application'}
                 </button>
+
+                {/* Alternate Action: Switch to Doctor Sign In */}
+                <div className="pt-3 text-center text-body-sm font-body-sm text-on-surface-variant">
+                  <span>Already registered? </span>
+                  <button
+                    type="button"
+                    onClick={() => handleSwitchAction('login')}
+                    className="text-secondary font-semibold hover:underline focus:outline-none focus:ring-2 focus:ring-secondary/20 rounded px-1 transition-colors"
+                  >
+                    Sign in
+                  </button>
+                </div>
+
+                {/* Cross-role Helper Link */}
+                <div className="pt-4 mt-2 border-t border-outline-variant/40 text-center">
+                  <button
+                    type="button"
+                    onClick={() => handleRoleSwitch('patient')}
+                    className="inline-flex items-center gap-1.5 text-body-xs font-medium text-on-surface-variant hover:text-primary transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">person</span>
+                    <span>Looking for patient care? Go to Patient Portal →</span>
+                  </button>
+                </div>
               </motion.form>
             )}
           </AnimatePresence>

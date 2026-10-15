@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import PatientLayout from '../components/PatientLayout';
 import { useAuth } from '../context/AuthContext';
 import ReviewModal from '../components/ReviewModal';
 import AppointmentDetailsModal from '../components/AppointmentDetailsModal';
+import PaymentModal from '../components/PaymentModal';
 
 const PatientAppointments = () => {
+  const navigate = useNavigate();
   const { profile } = useAuth();
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,16 +16,21 @@ const PatientAppointments = () => {
   const [selectedAptForReview, setSelectedAptForReview] = useState(null);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [selectedAptForDetails, setSelectedAptForDetails] = useState(null);
+  const [selectedAptForPayment, setSelectedAptForPayment] = useState(null);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
   useEffect(() => {
     if (profile) fetchAppointments();
     
-    // Set up Realtime subscription for appointments and prescriptions
+    // Set up Realtime subscription for appointments, prescriptions, and payments
     const channel = supabase.channel('patient_appointments')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'appointments' }, () => {
         fetchAppointments();
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'prescriptions' }, () => {
+        fetchAppointments();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'payments' }, () => {
         fetchAppointments();
       })
       .subscribe();
@@ -134,6 +142,20 @@ const PatientAppointments = () => {
                         {apt.status}
                       </span>
                       <span className="text-label-sm text-on-surface-variant font-mono">{apt.appointment_number}</span>
+                      
+                      {/* Payment Status Badge */}
+                      {apt.payment_status === 'completed' ? (
+                        <span className="px-2.5 py-0.5 rounded-full text-label-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[14px]">check_circle</span>
+                          Paid (₹{apt.doctors?.consultation_fee || 500})
+                        </span>
+                      ) : apt.status !== 'cancelled' ? (
+                        <span className="px-2.5 py-0.5 rounded-full text-label-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200 flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[14px]">hourglass_top</span>
+                          Payment Pending (₹{apt.doctors?.consultation_fee || 500})
+                        </span>
+                      ) : null}
+
                       {hasPrescription && (
                         <span className="px-2.5 py-0.5 rounded-full text-label-xs font-semibold bg-purple-50 text-purple-800 border border-purple-200 flex items-center gap-1">
                           <span className="material-symbols-outlined text-[14px]">prescriptions</span>
@@ -164,6 +186,20 @@ const PatientAppointments = () => {
                   </div>
                   
                   <div className="flex flex-row md:flex-col gap-2 shrink-0 md:min-w-[150px]">
+                    {/* Pay Now Button (if payment pending) */}
+                    {apt.payment_status !== 'completed' && apt.status !== 'cancelled' && (
+                      <button
+                        onClick={() => {
+                          setSelectedAptForPayment(apt);
+                          setIsPaymentModalOpen(true);
+                        }}
+                        className="px-4 py-2 bg-gradient-to-r from-primary to-secondary hover:opacity-95 text-on-primary rounded-lg text-label-md font-semibold transition-all shadow-xs flex items-center justify-center gap-1.5 w-full active:scale-95"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">payments</span>
+                        Pay Now (₹{apt.doctors?.consultation_fee || 500})
+                      </button>
+                    )}
+
                     {/* View Details / Prescription Action */}
                     <button
                       onClick={() => setSelectedAptForDetails(apt)}
@@ -185,8 +221,12 @@ const PatientAppointments = () => {
                       </button>
                     ) : null}
                     {apt.mode === 'online' && apt.status === 'confirmed' && (
-                      <button className="px-4 py-2 bg-primary text-on-primary hover:bg-primary/90 rounded-lg text-label-md font-medium transition-colors w-full">
-                        Join Call
+                      <button 
+                        onClick={() => navigate(`/consultations/${apt.id}/video`)}
+                        className="px-4 py-2 bg-primary hover:bg-secondary text-on-primary rounded-lg text-label-md font-semibold transition-all shadow-xs flex items-center justify-center gap-1.5 w-full active:scale-95"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">videocam</span>
+                        Join Video Call
                       </button>
                     )}
                     {/* Review Consultation Action */}
@@ -243,7 +283,27 @@ const PatientAppointments = () => {
             setSelectedAptForReview(apt);
             setIsReviewModalOpen(true);
           }}
+          onOpenPayment={(apt) => {
+            setSelectedAptForPayment(apt);
+            setIsPaymentModalOpen(true);
+          }}
         />
+
+        {/* Razorpay Payment Modal */}
+        {selectedAptForPayment && (
+          <PaymentModal
+            isOpen={isPaymentModalOpen}
+            onClose={() => {
+              setIsPaymentModalOpen(false);
+              setSelectedAptForPayment(null);
+            }}
+            appointment={selectedAptForPayment}
+            patientProfile={profile}
+            onPaymentSuccess={() => {
+              fetchAppointments();
+            }}
+          />
+        )}
       </div>
     </PatientLayout>
   );

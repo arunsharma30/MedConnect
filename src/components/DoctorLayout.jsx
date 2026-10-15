@@ -142,7 +142,11 @@ const DoctorLayout = ({ children, pageTitle = 'Dashboard' }) => {
           )}
           <div className="flex-1 min-w-0">
             <p className="text-body-md font-body-md text-on-surface font-semibold truncate">
-              Dr. {profile?.first_name} {profile?.last_name}
+              {(() => {
+                const first = profile?.first_name || '';
+                const cleanFirst = first.replace(/^dr\.?\s+/i, '');
+                return `Dr. ${cleanFirst} ${profile?.last_name || ''}`.trim();
+              })()}
             </p>
             <p className="text-body-sm font-body-sm text-on-surface-variant truncate">
               {doctorData?.specializations?.name || 'General Practice'}

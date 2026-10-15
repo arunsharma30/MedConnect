@@ -243,6 +243,12 @@ const DoctorProfile = () => {
     navigate(url);
   };
 
+  // Unreviewed appointments for this patient with this doctor
+  const unreviewedAppointments = useMemo(() => {
+    const reviewedIds = new Set(patientReviews.map(r => r.appointment_id));
+    return patientAppointments.filter(a => !reviewedIds.has(a.id));
+  }, [patientAppointments, patientReviews]);
+
   if (loading) {
     return (
       <PatientLayout>
@@ -293,12 +299,6 @@ const DoctorProfile = () => {
   }
 
   const supportsInPerson = !!doctor.hospitals;
-
-  // Unreviewed appointments for this patient with this doctor
-  const unreviewedAppointments = useMemo(() => {
-    const reviewedIds = new Set(patientReviews.map(r => r.appointment_id));
-    return patientAppointments.filter(a => !reviewedIds.has(a.id));
-  }, [patientAppointments, patientReviews]);
 
   const hasUnreviewedAppointment = unreviewedAppointments.length > 0;
   const hasReviewedDoctor = patientReviews.length > 0;

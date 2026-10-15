@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import DoctorLayout from '../components/DoctorLayout';
+import paymentService from '../services/paymentService';
 
 const DoctorDashboard = () => {
   const { profile } = useAuth();
@@ -186,6 +187,13 @@ const DoctorDashboard = () => {
 
   const updateStatus = async (id, newStatus) => {
     await supabase.from('appointments').update({ status: newStatus }).eq('id', id);
+    if (newStatus === 'completed') {
+      try {
+        await paymentService.releaseDoctorPayout(id);
+      } catch (err) {
+        console.warn('Non-fatal error releasing payout on completion:', err);
+      }
+    }
   };
 
   // Date display
@@ -239,7 +247,11 @@ const DoctorDashboard = () => {
             <div>
               <div className="flex items-center gap-2.5 mb-1">
                 <h1 className="text-headline-lg font-headline-lg font-bold text-on-surface tracking-tight">
-                  Welcome back, Dr. {profile?.first_name} {profile?.last_name}
+                  Welcome back, {(() => {
+                    const first = profile?.first_name || '';
+                    const cleanFirst = first.replace(/^dr\.?\s+/i, '');
+                    return `Dr. ${cleanFirst} ${profile?.last_name || ''}`.trim();
+                  })()}
                 </h1>
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-label-sm font-label-sm font-semibold">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
@@ -477,7 +489,10 @@ const DoctorDashboard = () => {
                         {apt.status === 'confirmed' && (
                           <>
                             {isVideo && (
-                              <button className="h-8 px-3 rounded-lg bg-primary-container text-on-primary text-label-md font-label-md hover:bg-[#5249EC] transition-colors flex items-center gap-1">
+                              <button 
+                                onClick={() => navigate(`/consultations/${apt.id}/video`)}
+                                className="h-8 px-3 rounded-lg bg-primary-container text-on-primary text-label-md font-label-md hover:bg-[#5249EC] transition-colors flex items-center gap-1 active:scale-95"
+                              >
                                 <span className="material-symbols-outlined text-[15px]">videocam</span>
                                 Start Video
                               </button>

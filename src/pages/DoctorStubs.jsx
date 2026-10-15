@@ -557,10 +557,4 @@ export const DoctorDiagnostics = () => (
   />
 );
 
-export const DoctorBilling = () => (
-  <ComingSoonPage
-    title="Billing & Payouts"
-    icon="payments"
-    description="View your earnings, consultation fees, and payout history. Payment integration will be available here."
-  />
-);
+export { default as DoctorBilling } from './DoctorBillingPage';

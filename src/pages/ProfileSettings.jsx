@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
-import DashboardLayout from '../components/DashboardLayout';
+import DoctorLayout from '../components/DoctorLayout';
 import PatientLayout from '../components/PatientLayout';
 
 const ProfileSettings = () => {
@@ -11,7 +11,7 @@ const ProfileSettings = () => {
   const [errorNotice, setErrorNotice] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   
-  const Layout = role === 'patient' ? PatientLayout : DashboardLayout;
+  const Layout = role === 'patient' ? PatientLayout : DoctorLayout;
 
   // Common Profile Fields
   const [firstName, setFirstName] = useState('');
@@ -157,7 +157,7 @@ const ProfileSettings = () => {
   );
 
   return (
-    <Layout>
+    <Layout pageTitle="My Profile">
       <div className="bg-white rounded-2xl shadow-sm border border-outline-variant/50 p-6 md:p-8">
         <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
@@ -231,7 +231,7 @@ const ProfileSettings = () => {
                 <h3 className="text-title-md text-on-surface border-b border-outline-variant pb-2 mb-4">Professional Information</h3>
                 <div className="space-y-1">
                   <InfoRow label="Experience" value={experience} />
-                  <InfoRow label="Consultation Fee" value={`$${consultationFee}`} />
+                  <InfoRow label="Consultation Fee" value={consultationFee ? `₹${consultationFee}` : '-'} />
                   <InfoRow label="Qualifications" value={qualification} />
                   <InfoRow label="Languages" value={languages} />
                   <div className="py-3 flex flex-col">
@@ -327,8 +327,8 @@ const ProfileSettings = () => {
                     <input className="w-full h-11 px-4 rounded-xl border border-outline-variant bg-surface-container-lowest focus:border-primary outline-none" placeholder="e.g. 10 Years" value={experience} onChange={e => setExperience(e.target.value)} />
                   </div>
                   <div>
-                    <label className="block text-label-md text-on-surface mb-1.5">Consultation Fee ($)</label>
-                    <input type="number" min="0" step="0.01" className="w-full h-11 px-4 rounded-xl border border-outline-variant bg-surface-container-lowest focus:border-primary outline-none" placeholder="e.g. 150.00" value={consultationFee} onChange={e => setConsultationFee(e.target.value)} />
+                    <label className="block text-label-md text-on-surface mb-1.5">Consultation Fee (₹)</label>
+                    <input type="number" min="0" step="1" className="w-full h-11 px-4 rounded-xl border border-outline-variant bg-surface-container-lowest focus:border-primary outline-none" placeholder="e.g. 500" value={consultationFee} onChange={e => setConsultationFee(e.target.value)} />
                   </div>
                   <div>
                     <label className="block text-label-md text-on-surface mb-1.5">Qualifications</label>

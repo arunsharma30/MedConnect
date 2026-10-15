@@ -1,19 +1,83 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import PatientLayout from '../components/PatientLayout';
 
+// Comprehensive dictionary mapping common conditions & symptoms to medical specialties
+const CONDITION_SPECIALTY_MAP = {
+  fever: ['General Practice', 'Internal Medicine', 'Pediatrics'],
+  cold: ['General Practice', 'ENT', 'Pediatrics'],
+  flu: ['General Practice', 'Internal Medicine'],
+  cough: ['General Practice', 'Pulmonology', 'ENT', 'Pediatrics'],
+  headache: ['General Practice', 'Neurology'],
+  migraine: ['Neurology', 'General Practice'],
+  chest: ['Cardiology', 'Pulmonology'],
+  heart: ['Cardiology'],
+  bp: ['Cardiology', 'Internal Medicine', 'General Practice'],
+  hypertension: ['Cardiology', 'Internal Medicine'],
+  skin: ['Dermatology'],
+  acne: ['Dermatology'],
+  rash: ['Dermatology'],
+  hair: ['Dermatology'],
+  bone: ['Orthopedics'],
+  joint: ['Orthopedics'],
+  knee: ['Orthopedics'],
+  back: ['Orthopedics'],
+  spine: ['Orthopedics'],
+  fracture: ['Orthopedics'],
+  child: ['Pediatrics'],
+  baby: ['Pediatrics'],
+  kid: ['Pediatrics'],
+  eye: ['Ophthalmology'],
+  vision: ['Ophthalmology'],
+  teeth: ['Dentistry'],
+  tooth: ['Dentistry'],
+  dental: ['Dentistry'],
+  diabetes: ['Endocrinology', 'General Practice'],
+  sugar: ['Endocrinology', 'General Practice'],
+  thyroid: ['Endocrinology'],
+  mental: ['Psychiatry', 'Psychology'],
+  depression: ['Psychiatry', 'Psychology'],
+  anxiety: ['Psychiatry', 'Psychology'],
+  stress: ['Psychiatry', 'Psychology'],
+  ear: ['ENT'],
+  nose: ['ENT'],
+  throat: ['ENT'],
+  stomach: ['Gastroenterology', 'General Practice'],
+  acidity: ['Gastroenterology'],
+  digestive: ['Gastroenterology'],
+  pregnancy: ['Gynecology', 'Obstetrics'],
+  pregnant: ['Gynecology', 'Obstetrics'],
+  women: ['Gynecology'],
+  pcos: ['Gynecology'],
+  asthma: ['Pulmonology', 'Pediatrics'],
+};
+
 const DoctorSearch = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [specialties, setSpecialties] = useState([]);
   
-  // Filter States
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSpecialty, setSelectedSpecialty] = useState('All Specialties');
+  // Filter States - Initialized from URL if present
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || searchParams.get('search') || '');
+  const [selectedSpecialty, setSelectedSpecialty] = useState(searchParams.get('specialty') || 'All Specialties');
   const [selectedAvailability, setSelectedAvailability] = useState('Anytime');
   const [sortBy, setSortBy] = useState('Recommended');
   const [visitType, setVisitType] = useState('All Visits');
+
+  // Sync state when URL searchParams change
+  useEffect(() => {
+    const q = searchParams.get('q') || searchParams.get('search');
+    if (q !== null && q !== undefined) {
+      setSearchQuery(q);
+    }
+    const spec = searchParams.get('specialty');
+    if (spec) {
+      setSelectedSpecialty(spec);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     fetchInitialData();
@@ -31,6 +95,9 @@ const DoctorSearch = () => {
             id,
             consultation_fee,
             experience,
+            qualification,
+            bio,
+            languages,
             rating,
             total_reviews,
             reviews ( rating ),
@@ -45,7 +112,27 @@ const DoctorSearch = () => {
       if (specRes.error) throw specRes.error;
       if (docsRes.error) throw docsRes.error;
 
-      if (specRes.data) setSpecialties(specRes.data);
+      if (specRes.data && specRes.data.length > 0) {
+        setSpecialties(specRes.data);
+      } else {
+        // Fallback default specialties when DB table is empty
+        const defaultSpecialties = [
+          'General Practice',
+          'Cardiology',
+          'Dermatology',
+          'Pediatrics',
+          'Neurology',
+          'Orthopedics',
+          'Gynecology',
+          'Psychiatry',
+          'ENT',
+          'Gastroenterology',
+          'Ophthalmology',
+          'Dentistry',
+        ];
+        setSpecialties(defaultSpecialties.map((name, idx) => ({ id: `spec-${idx}`, name })));
+      }
+
       if (docsRes.data) setDoctors(docsRes.data);
     } catch (err) {
       console.error("Error fetching doctors:", err);
@@ -61,6 +148,28 @@ const DoctorSearch = () => {
     setSelectedAvailability('Anytime');
     setSortBy('Recommended');
     setVisitType('All Visits');
+    setSearchParams({}, { replace: true });
+  };
+
+  const handleSearchInputChange = (e) => {
+    const val = e.target.value;
+    setSearchQuery(val);
+    const nextParams = new URLSearchParams(searchParams);
+    if (val.trim()) {
+      nextParams.set('q', val);
+    } else {
+      nextParams.delete('q');
+      nextParams.delete('search');
+    }
+    setSearchParams(nextParams, { replace: true });
+  };
+
+  const formatDoctorName = (profile) => {
+    if (!profile) return 'Doctor';
+    const first = profile.first_name || '';
+    const last = profile.last_name || '';
+    const cleanFirst = first.replace(/^dr\.?\s+/i, '');
+    return `Dr. ${cleanFirst} ${last}`.trim();
   };
 
   // Helper to determine next slot
@@ -135,18 +244,74 @@ const DoctorSearch = () => {
 
     // Search Query Filter
     if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
+      const q = searchQuery.toLowerCase().trim();
+      const tokens = q.split(/\s+/).filter(Boolean);
+
+      // Collect any specialties that match symptoms/conditions in the query
+      const matchedSpecialtiesFromConditions = new Set();
+      tokens.forEach(tok => {
+        if (CONDITION_SPECIALTY_MAP[tok]) {
+          CONDITION_SPECIALTY_MAP[tok].forEach(s => matchedSpecialtiesFromConditions.add(s.toLowerCase()));
+        }
+      });
+
       result = result.filter(doc => {
-        const fullName = `Dr. ${doc.profiles?.first_name} ${doc.profiles?.last_name}`.toLowerCase();
-        const specialty = (doc.specializations?.name || '').toLowerCase();
+        const rawFirst = (doc.profiles?.first_name || '').toLowerCase();
+        const cleanFirst = rawFirst.replace(/^dr\.?\s+/i, '');
+        const cleanLast = (doc.profiles?.last_name || '').toLowerCase();
+        const cleanFull = `${cleanFirst} ${cleanLast}`.trim();
+        const rawFull = `dr. ${rawFirst} ${cleanLast}`.trim();
+        const specialty = (doc.specializations?.name || 'General Practice').toLowerCase();
         const hospital = (doc.hospitals?.name || '').toLowerCase();
-        return fullName.includes(q) || specialty.includes(q) || hospital.includes(q);
+        const qual = (doc.qualification || '').toLowerCase();
+        const bio = (doc.bio || '').toLowerCase();
+        const languages = Array.isArray(doc.languages) ? doc.languages.join(' ').toLowerCase() : '';
+
+        // 1. Exact or partial substring match
+        if (
+          cleanFull.includes(q) ||
+          rawFull.includes(q) ||
+          cleanFirst.includes(q) ||
+          cleanLast.includes(q) ||
+          specialty.includes(q) ||
+          hospital.includes(q) ||
+          qual.includes(q) ||
+          bio.includes(q) ||
+          languages.includes(q)
+        ) {
+          return true;
+        }
+
+        // 2. Multi-token match (if user searches e.g. "aryan general")
+        const allTokensMatch = tokens.every(tok => 
+          cleanFull.includes(tok) ||
+          rawFull.includes(tok) ||
+          cleanFirst.includes(tok) ||
+          cleanLast.includes(tok) ||
+          specialty.includes(tok) ||
+          hospital.includes(tok) ||
+          qual.includes(tok) ||
+          languages.includes(tok)
+        );
+        if (allTokensMatch) return true;
+
+        // 3. Condition or symptom match
+        if (matchedSpecialtiesFromConditions.size > 0) {
+          for (const s of matchedSpecialtiesFromConditions) {
+            if (s && (specialty.includes(s) || s.includes(specialty))) return true;
+          }
+        }
+
+        return false;
       });
     }
 
     // Specialty Filter
     if (selectedSpecialty !== 'All Specialties') {
-      result = result.filter(doc => doc.specializations?.name === selectedSpecialty);
+      result = result.filter(doc => {
+        const docSpec = doc.specializations?.name || 'General Practice';
+        return docSpec.toLowerCase() === selectedSpecialty.toLowerCase();
+      });
     }
 
     // Visit Type Filter
@@ -216,11 +381,27 @@ const DoctorSearch = () => {
                     <input 
                       id="doctor-query" 
                       type="text" 
-                      className="w-full h-[42px] pl-10 pr-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-body-md text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/15 transition-all" 
-                      placeholder="Search by doctor name or specialty..."
+                      className="w-full h-[42px] pl-10 pr-10 rounded-lg border border-outline-variant bg-surface-container-lowest text-body-md text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/15 transition-all" 
+                      placeholder="Search by doctor name, specialty, or condition..." 
                       value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onChange={handleSearchInputChange}
                     />
+                    {searchQuery && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSearchQuery('');
+                          const nextParams = new URLSearchParams(searchParams);
+                          nextParams.delete('q');
+                          nextParams.delete('search');
+                          setSearchParams(nextParams, { replace: true });
+                        }}
+                        className="absolute right-2 top-2.5 text-outline hover:text-on-surface p-1 rounded"
+                        title="Clear search"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">close</span>
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -416,7 +597,7 @@ const DoctorSearch = () => {
                           </div>
                           <div>
                             <h3 className="font-headline-sm text-headline-sm font-semibold text-on-surface group-hover:text-primary-container transition-colors">
-                              Dr. {doctor.profiles?.first_name} {doctor.profiles?.last_name}
+                              {formatDoctorName(doctor.profiles)}
                             </h3>
                             <p className="font-body-sm text-body-sm text-on-surface-variant font-medium">
                               {doctor.specializations?.name || 'General Practice'}
