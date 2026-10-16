@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import PatientLayout from '../components/PatientLayout';
 
@@ -54,6 +54,7 @@ const CONDITION_SPECIALTY_MAP = {
 };
 
 const DoctorSearch = () => {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -663,14 +664,14 @@ const DoctorSearch = () => {
                       {/* Bottom Action Buttons */}
                       <div className="p-4 bg-surface-container-low/60 border-t border-outline-variant/40 grid grid-cols-2 gap-2.5">
                         <button 
-                          onClick={() => { window.location.href = `/patient/doctors/${doctor.id}`; }}
+                          onClick={() => { navigate(`/patient/doctors/${doctor.id}`); }}
                           className="h-10 px-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container-low hover:border-outline font-label-md text-label-md font-medium transition-all active:scale-95 text-center" 
                           type="button"
                         >
                           View Profile
                         </button>
                         <button 
-                          onClick={() => { window.location.href = `/patient/book-appointment?doctor_id=${doctor.id}`; }}
+                          onClick={() => { navigate(`/patient/book-appointment?doctor_id=${doctor.id}`); }}
                           className="h-10 px-3 rounded-lg bg-primary-container text-on-primary hover:bg-[#5249EC] active:bg-[#443CC7] font-label-md text-label-md font-medium transition-all active:scale-95 shadow-sm text-center flex items-center justify-center gap-1.5" 
                           type="button"
                         >
