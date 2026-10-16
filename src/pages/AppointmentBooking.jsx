@@ -231,7 +231,7 @@ const AppointmentBooking = () => {
         .select('start_time')
         .eq('doctor_id', docId)
         .eq('appointment_date', date)
-        .not('status', 'in', '("cancelled", "no_show")');
+        .not('status', 'in', '(cancelled,no_show)');
 
       if (error) throw error;
       if (data) {
@@ -346,7 +346,7 @@ const AppointmentBooking = () => {
         .eq('doctor_id', doctor.id)
         .eq('appointment_date', selectedDate)
         .eq('start_time', selectedTime.length === 5 ? `${selectedTime}:00` : selectedTime)
-        .not('status', 'in', '("cancelled", "no_show")')
+        .not('status', 'in', '(cancelled,no_show)')
         .maybeSingle();
 
       if (conflictErr) throw conflictErr;

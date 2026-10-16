@@ -140,7 +140,7 @@ const DoctorProfile = () => {
         .select('start_time')
         .eq('doctor_id', doctorId)
         .eq('appointment_date', date)
-        .not('status', 'in', '("cancelled", "no_show")');
+        .not('status', 'in', '(cancelled,no_show)');
       
       if (data) {
         setBookedSlots(data.map(b => b.start_time.substring(0, 5)));

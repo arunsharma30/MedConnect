@@ -110,7 +110,7 @@ const DoctorDashboard = () => {
       .from('appointments')
       .select('patient_id')
       .eq('doctor_id', docId)
-      .not('status', 'in', '("cancelled","no_show")');
+      .not('status', 'in', '(cancelled,no_show)');
 
     // Pending prescriptions
     const { count: prescCount } = await supabase
